@@ -1,0 +1,38 @@
+{
+	"/": [
+		"src/routes/+page.ts"
+	],
+	"/api/config": [
+		"src/routes/api/config/+server.ts"
+	],
+	"/api/data/[name]": [
+		"src/routes/api/data/[name]/+server.ts"
+	],
+	"/api/data/[name]/schema": [
+		"src/routes/api/data/[name]/schema/+server.ts"
+	],
+	"/api/data/[name]/[id]": [
+		"src/routes/api/data/[name]/[id]/+server.ts"
+	],
+	"/api/data/[name]/[id]/likes": [
+		"src/routes/api/data/[name]/[id]/likes/+server.ts"
+	],
+	"/api/usage": [
+		"src/routes/api/usage/+server.ts"
+	],
+	"/api/users": [
+		"src/routes/api/users/+server.ts"
+	],
+	"/[name]": [
+		"src/routes/[name]/+page.server.ts"
+	],
+	"/[name]/new": [
+		"src/routes/[name]/new/+page.ts"
+	],
+	"/[name]/[id]": [
+		"src/routes/[name]/[id]/+page.ts"
+	],
+	"/[name]/[id]/edit": [
+		"src/routes/[name]/[id]/edit/+page.ts"
+	]
+}
