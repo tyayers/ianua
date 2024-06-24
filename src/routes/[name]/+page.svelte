@@ -125,6 +125,9 @@
   }
 
   function refreshAssets() {
+    // Trigger general refresh
+    rowData = rowData;
+    
     // Calculate latest
     if (dateIndex) {
       rowData.rows.sort((a, b) => {
@@ -358,7 +361,7 @@
     </div>
 
     <div class="assets_box">
-      {#each highestRatedRows as highRow}
+      {#each highestRatedRows as highRow, i}
         <RowCard row={highRow} sheetConfig={sheetConfig} />
       {/each}
     </div>

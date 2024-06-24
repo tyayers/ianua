@@ -8,22 +8,16 @@
   export let row: string[];
   export let sheetConfig: DataConfig;
 
-  let id: string = row[sheetConfig.tagIndexes["id"]];
-  let name: string = row[sheetConfig.tagIndexes["name"]];
-  let description: string = row[sheetConfig.tagIndexes["description"]];
-  let date: string = row[sheetConfig.tagIndexes["date"]];
-  let audience: string = row[sheetConfig.tagIndexes["audience"]];
-  let likes: string[] = [];
-  let likesString = row[sheetConfig.tagIndexes["likes"]];
-  if (likesString.length > 0) {
-    likes = likesString.split(",").map((item) => {
-      return item.trim();
-    });
-  }
-  let types: string[] = row[sheetConfig.tagIndexes["type"]].split(",").map((item) => {
+  $: id = row[sheetConfig.tagIndexes["id"]];
+  $: name = row[sheetConfig.tagIndexes["name"]];
+  $: description = row[sheetConfig.tagIndexes["description"]];
+  $: date = row[sheetConfig.tagIndexes["date"]];
+  $: audience = row[sheetConfig.tagIndexes["audience"]];
+  $: likes = row[sheetConfig.tagIndexes["likes"]].length > 0 ? row[sheetConfig.tagIndexes["likes"]].split(",") : [];
+  $: types = row[sheetConfig.tagIndexes["type"]].split(",").map((item) => {
     return item.trim();
   });
-  let categories: string[] = row[sheetConfig.tagIndexes["category"]].split(",").map((item) => {
+  $: categories = row[sheetConfig.tagIndexes["category"]].split(",").map((item) => {
     return item.trim();
   });
   
