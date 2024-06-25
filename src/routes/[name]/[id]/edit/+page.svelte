@@ -36,7 +36,7 @@
   }
 
   function submit() {
-    fetch("/api/data/" + row[idIndex], {
+    fetch("/api/data/" + sheetConfig?.name + "/" + row[idIndex], {
       method: "PUT",
       headers: {
         "Content-Type": "application/json"

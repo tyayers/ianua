@@ -1,7 +1,7 @@
 import { json, type RequestHandler } from "@sveltejs/kit";
 import { GoogleAuth } from "google-auth-library";
 import { google } from "googleapis";
-import { Asset, Config, DataConfig } from "$lib/interfaces";
+import { Config, DataConfig } from "$lib/interfaces";
 import crypto from "crypto";
 import { PUBLIC_SHEETS_ID } from '$env/static/public';
 
@@ -34,6 +34,7 @@ export const GET: RequestHandler = async ( {params, fetch} ) => {
 
     const headersResult = res.data.values;
     if (headersResult && headersResult.length > 0) headers = headersResult[0];
+    headers.push("rowNumber");
 
     const res2 = await sheets.spreadsheets.values.get({
       spreadsheetId: config.sheetId,
@@ -55,6 +56,8 @@ export const GET: RequestHandler = async ( {params, fetch} ) => {
 
         while(row.length < headers.length)
           row.push("");
+
+        row.push(i.toString());
       });
     }
   }
@@ -66,25 +69,12 @@ export const GET: RequestHandler = async ( {params, fetch} ) => {
 };
 
 export const POST: RequestHandler = async ({ request }) => {
-  const newAsset: Asset = await request.json();
-  newAsset.id = crypto.randomBytes(10).toString("hex");
+  const newRow: string[] = await request.json();
+  newRow[0] = crypto.randomBytes(10).toString("hex");
+
+  console.log(JSON.stringify(newRow));
 
   const values: string[][] = [];
-  const newRow: string[] = [];
-  newRow[0] = newAsset.id;
-  newRow[1] = newAsset.name;
-  newRow[2] = newAsset.type.join(",");
-  newRow[3] = newAsset.details;
-  newRow[4] = newAsset.owner;
-  newRow[5] = newAsset.status;
-  newRow[6] = newAsset.level.join(",");
-  newRow[7] = newAsset.audience;
-  newRow[8] = newAsset.lastUpdated;
-  newRow[9] = newAsset.link;
-  newRow[10] = newAsset.products.join(",");
-  newRow[11] = newAsset.likes.join(",");
-  newRow[12] = newAsset.keywords.join(",");
-
   values.push(newRow);
 
   try {
@@ -100,7 +90,7 @@ export const POST: RequestHandler = async ({ request }) => {
     console.error(err);
   }
 
-  return json(newAsset);
+  return json(newRow);
 };
 
 async function updateRow(row: string[], index: number, range: string) {

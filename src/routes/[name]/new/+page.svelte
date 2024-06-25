@@ -8,8 +8,7 @@
 
   export let data: PageData;
   let sheetConfig: DataConfig | undefined = undefined;
-  let rowConfig: RowConfig | undefined = undefined;
-  let row: string[] = [];
+  let rowConfig: RowConfig = new RowConfig();
   let headers: string[] = [];
   let idIndex: number = -1;
 
@@ -19,9 +18,23 @@
       sheetConfig = appService.GetSheetConfig(data.dataName, headers);
       if (sheetConfig) {
         idIndex = sheetConfig?.tagIndexes["id"];
-        rowConfig = new RowConfig();
-        row = Array(result.headers.length).fill("");
-        rowConfig.row = row;
+        rowConfig.row = Array(result.headers.length).fill("");
+
+        // Fill any initial values
+        sheetConfig.fields.forEach((field) => {
+          if (field.initialValue) {
+            let rowIndex = result.headers.indexOf(field.id);
+            if (field.initialValue === "CURRENT_USER" && appService.currentUser)
+              rowConfig.row[rowIndex] = appService.currentUser.email;
+            else if (field.initialValue === "TODAY") {
+              let startDate = new Date();
+              let startDateString: string = (startDate.getMonth() + 1).toString() + "/" + startDate.getDate().toString() + "/" + startDate.getFullYear().toString();
+              rowConfig.row[rowIndex] = startDateString;
+            }
+            else
+              rowConfig.row[rowIndex] = field.initialValue;
+          }
+        });
       }
     });
   });
@@ -31,18 +44,24 @@
   }
 
   function submit() {
-    fetch("/api/data/" + row[idIndex], {
-      method: "PUT",
+    fetch("/api/data/" + sheetConfig?.name, {
+      method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(row)
+      body: JSON.stringify(rowConfig.row)
     }).then((response) => {
       // console.log(`Response ${response.status} - ${response.statusText} from asset post.`);
-      return response.json();
-    }).then((result: Asset) => {
-      // if (result)
-      //   appService.assets.push(result);
+      if (response.status === 200)
+        return response.json();
+      else
+        console.error("Error creating row: " + response.statusText);
+    }).then((result: string[]) => {
+      if (result && sheetConfig) {
+        result.push((appService.data[sheetConfig.name].rows.length - 1).toString())
+        appService.data[sheetConfig.name].rows.push(result);
+
+      }
       goto("/");
     });
   }

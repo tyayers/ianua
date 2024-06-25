@@ -24,7 +24,9 @@
 
   function clickOption(option: string) {
     if (multi) {
-      let options: string[] = selectedData.split(",");
+      let options: string[] = selectedData.split(", ");
+      if (options.length === 1 && options[0] === "")
+        options = [];
       if (selectedData.includes(option)) {
         let index = options.indexOf(option);
         options.splice(index, 1);
@@ -32,7 +34,7 @@
         options.push(option);
       }
 
-      selectedData = options.join(",");
+      selectedData = options.join(", ");
     }
     else {
       selectedData = option;
@@ -72,6 +74,7 @@
     background-color: #f0f0f0;
     min-width: 176px;
     min-height: 20px;
+    height: 34px;
     padding: 12px;
     border-radius: 12px;
     cursor: pointer;
@@ -79,6 +82,7 @@
 
   .menu {
     position: absolute;
+    top: 44px;
     margin-top: 4px;
     z-index: 2;
     padding: 12px;
