@@ -1,7 +1,9 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { Asset, AssetStatus, DataConfig, RowConfig } from "$lib/interfaces";
+  import { DataConfig, RowConfig } from "$lib/interfaces";
   import RowEdit from '$lib/components.row.edit.svelte';
+  import Header from '$lib/components.header.svelte';
+
   import { appService } from "$lib/app-service";
   import { onMount } from "svelte";
   import type { PageData } from "./$types";
@@ -17,8 +19,9 @@
       headers = result.headers;
       sheetConfig = appService.GetSheetConfig(data.dataName, headers);
       if (sheetConfig) {
+        appService.setHeaderAction("SAVE");
         idIndex = sheetConfig?.tagIndexes["id"];
-        rowConfig.row = Array(result.headers.length).fill("");
+        rowConfig.row = Array(result.headers.length - 1).fill("");
 
         // Fill any initial values
         sheetConfig.fields.forEach((field) => {
@@ -36,6 +39,11 @@
           }
         });
       }
+    });
+
+
+    document.addEventListener("headerAction", () => {
+      submit();
     });
   });
 
@@ -58,15 +66,16 @@
         console.error("Error creating row: " + response.statusText);
     }).then((result: string[]) => {
       if (result && sheetConfig) {
-        result.push((appService.data[sheetConfig.name].rows.length - 1).toString())
+        result.push((appService.data[sheetConfig.name].rows.length).toString());
         appService.data[sheetConfig.name].rows.push(result);
-
       }
       goto("/");
     });
   }
 
 </script>
+
+<Header actionButtonText="Save" actionButtonColor="green" actionButtonTextColor="white" actionEvent={submit} /> 
 
 <div class="new_box">
 
@@ -75,12 +84,14 @@
   </div>
 
   {#if sheetConfig && rowConfig}
-    <RowEdit {sheetConfig} {rowConfig} />
+    <div style="padding-bottom: 104px;">
+      <RowEdit {sheetConfig} {rowConfig} />
+    </div>
 
-    <div class="form_controls" style="margin-top: 44px;">
+    <!-- <div class="form_controls" style="margin-top: 44px;">
       <button on:click={back} type="button" class="rounded_button_outlined">Cancel</button>
       <button type="button" on:click={submit} class="rounded_button_filled">Save</button>
-    </div>
+    </div> -->
   {:else}
     <div
       class="ring_lower lds-ring"

@@ -15,6 +15,9 @@ export class AppService {
   data: {[key: string]: {headers: string[], rows: string[][]}} = {};
   sheetConfig: {[key: string]: DataConfig | undefined} = {};
   testMode: boolean = false;
+  setHeaderAction: (buttonText: string) => void = (fds: string) => {
+    console.log(fds);
+  };
 
   constructor() {
     if (!this.siteName) this.siteName = "Data Marketplace";
@@ -34,6 +37,10 @@ export class AppService {
         document.dispatchEvent(new Event('configUpdated'));
       });
     }
+  }
+
+  SetHeaderAction(buttonText: string) {
+    this.setHeaderAction(buttonText);
   }
 
   LoadUser(email: string) {

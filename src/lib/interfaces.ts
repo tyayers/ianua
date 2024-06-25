@@ -92,19 +92,19 @@ export class Config {
 export class DataConfig {
   sheetId: string;
   name: string;
-  headerRange: string;
-  range: string;
+  rangeStart: string;
+  rangeEnd: string;
   tagIndexes: {[key: string]: number} = {};
   fieldIndexes: {[key: string]: number} = {};
   typeColors: {[key: string]: string} = {};
   categoryIcons: {[key: string]: string} = {};
   fields: FieldConfig[] = [];
 
-  constructor(sheetId: string, name: string, range: string, headerRange: string) {
+  constructor(sheetId: string, name: string, rangeStart: string, rangeEnd: string) {
     this.sheetId = sheetId;
     this.name = name;
-    this.headerRange = headerRange;
-    this.range = range;
+    this.rangeStart = rangeStart;
+    this.rangeEnd = rangeEnd;
   }
 }
 

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { Asset, AssetStatus, DataConfig, RowConfig } from "$lib/interfaces";
+  import Header from '$lib/components.header.svelte';
   import RowEdit from '$lib/components.row.edit.svelte';
   import { appService } from "$lib/app-service";
   import { onMount } from "svelte";
@@ -36,7 +37,7 @@
   }
 
   function submit() {
-    fetch("/api/data/" + sheetConfig?.name + "/" + row[idIndex], {
+    fetch("/api/data/" + sheetConfig?.name + "/" + row[idIndex] + "?rangeStart=" + sheetConfig?.rangeStart + "&rangeEnd=" + sheetConfig?.rangeEnd, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json"
@@ -53,6 +54,8 @@
   }
 
 </script>
+
+<Header actionButtonText="Save" actionButtonColor="green" actionButtonTextColor="white" actionEvent={submit} /> 
 
 <div class="new_box">
 

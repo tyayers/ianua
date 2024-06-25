@@ -12,9 +12,11 @@ const auth = new GoogleAuth({
 
 const sheets = google.sheets({version: 'v4', auth});
 
-export const PUT: RequestHandler = async ({ request }) => {
-  
+export const PUT: RequestHandler = async ({ request, url }) => {
+
   const updateRow: string[] = await request.json();
+  const rangeStart = url.searchParams.get("rangeStart") ?? "";
+  const rangeEnd = url.searchParams.get("rangeEnd") ?? "";
   const rowIndex = parseInt(updateRow[updateRow.length - 1]) + 2;
   updateRow.splice(updateRow.length - 1, 1);
   const values: string[][] = [];
@@ -23,7 +25,7 @@ export const PUT: RequestHandler = async ({ request }) => {
   try {
     await sheets.spreadsheets.values.update({
       spreadsheetId: PUBLIC_SHEETS_ID,
-      range: 'Assets!A' + rowIndex + ":M" + rowIndex,
+      range: rangeStart + rowIndex + ":" + rangeEnd + rowIndex,
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: values

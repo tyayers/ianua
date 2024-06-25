@@ -3,6 +3,7 @@
   import type { PageData } from "./$types";
   import { DataConfig, RowConfig, UsageData } from "$lib/interfaces";
   import { appService } from "$lib/app-service";
+  import Header from '$lib/components.header.svelte';
 	import { PUBLIC_TEST_MODE } from '$env/static/public';
 
   export let data: PageData;
@@ -154,6 +155,8 @@
   }
 </script>
 
+<Header />
+
 <div class="page">
   {#if sheetConfig && row.length > 0}
   <div class="back_box">
@@ -260,7 +263,7 @@
 <style>
   .page {
     max-width: 600px;
-    margin-top: 44px;
+    margin-top: 64px;
     margin-bottom: 44px;
     margin-left: auto;
     margin-right: auto;

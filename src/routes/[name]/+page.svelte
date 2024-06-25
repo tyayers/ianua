@@ -2,9 +2,11 @@
   import { onMount } from "svelte";
   import type { PageServerData } from "./$types";
   import RowCard from "$lib/components.row.card.svelte";
+  import Header from "$lib/components.header.svelte";
   import { Config, DataConfig, UsageData, type Asset } from "$lib/interfaces";
   import { PUBLIC_TEST_MODE } from "$env/static/public";
   import { appService } from "$lib/app-service";
+  import { goto } from "$app/navigation";
 
   export let data: PageServerData;
 
@@ -79,6 +81,8 @@
     if (!sheetConfig) sheetConfig = appService.GetSheetConfig(data.dataName, rowData.headers);
 
     if (sheetConfig) {
+      appService.SetHeaderAction("+ Add " + sheetConfig?.name);
+
       nameIndex = sheetConfig.tagIndexes["name"];
       descriptionIndex = sheetConfig.tagIndexes["description"];
       typeIndex = sheetConfig.tagIndexes["type"];
@@ -174,7 +178,6 @@
       }
     }
     highestRatedRows = newHighestRatedAssets;
-    console.log(highestRatedRows);
 
     // Sort main list alphabetically
     rowData.rows.sort(function(a, b) {
@@ -247,7 +250,14 @@
     }
     selectedTypes = selectedTypes;
   }
+
+  function actionAdd() {
+    if (sheetConfig)
+      goto("/" + sheetConfig.name + "/new");
+  }
 </script>
+
+<Header actionButtonText="+ Add" actionEvent={actionAdd} />
 
 <div class="home_box">
   <div class="hero_box">

@@ -4,14 +4,17 @@
   import { appService } from './app-service';
 	import { goto } from '$app/navigation';
 
+  export let actionButtonText: string = "";
+  export let actionButtonColor: string = "white";
+  export let actionButtonTextColor: string = "#6595fc";
+  export let actionEvent: (actionButtonText: string) => void = ((buttonText) => {
+    console.log(buttonText);
+  });
+
   let currentUser: User | undefined = appService.currentUser;
-  let showAddButton: boolean = true;
   let menuVisible: boolean = false;
 
   onMount(async () => {
-    if (window.location.pathname != "/") {
-      showAddButton = false;
-    }
 
     document.addEventListener("userUpdated", () => {
       currentUser = appService.currentUser;
@@ -32,7 +35,7 @@
   }
 
   function signOut() {
-    appService.SignOut();
+    // appService.SignOut();
 
     //First, we initialize our event
     const event = new Event('cancelEvent');
@@ -42,9 +45,9 @@
     goto("/");
   }
 
-  function goToAddAsset() {
-    goto("/assets/new");
-  } 
+  function triggerAction() {
+    if (actionEvent) actionEvent(actionButtonText);
+  }
 
 </script>
 
@@ -61,7 +64,9 @@
     
     {#if currentUser}
 
-      <button style="position: relative; top: -14px; left: -28px;" on:click={goToAddAsset} class="rounded_button_outlined">+ Add asset</button>
+      {#if actionButtonText}
+        <button style={"position: relative; top: -14px; left: -28px; background-color: " + actionButtonColor + "; color: " + actionButtonTextColor} on:click|stopPropagation={triggerAction} class="rounded_button_outlined">{actionButtonText}</button>
+      {/if}
 
       <button style="position: relative; top: -4px; left: -10px;" class="back_button">
         <svg width="100%" height="100%" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false"><path fill="#333" d="M18 17v-6c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v6H4v2h16v-2h-2zm-2 0H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6zm-4 5c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2z"></path></svg>

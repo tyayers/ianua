@@ -29,7 +29,7 @@ export const GET: RequestHandler = async ( {params, fetch} ) => {
 
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId: config.sheetId,
-      range: config.headerRange,
+      range: config.rangeStart + "1:" + config.rangeEnd,
     });
 
     const headersResult = res.data.values;
@@ -38,7 +38,7 @@ export const GET: RequestHandler = async ( {params, fetch} ) => {
 
     const res2 = await sheets.spreadsheets.values.get({
       spreadsheetId: config.sheetId,
-      range: config.range,
+      range: config.rangeStart + "2:" + config.rangeEnd,
     });
     rows = res2.data.values;
 
@@ -51,7 +51,7 @@ export const GET: RequestHandler = async ( {params, fetch} ) => {
         if (!id || id.length < 2) {
           id = crypto.randomBytes(10).toString("hex");
           row[0] = id;
-          updateRow(row, i, config.range);
+          updateRow(row, i, config.rangeStart, config.rangeEnd);
         }
 
         while(row.length < headers.length - 1)
@@ -72,8 +72,6 @@ export const POST: RequestHandler = async ({ request }) => {
   const newRow: string[] = await request.json();
   newRow[0] = crypto.randomBytes(10).toString("hex");
 
-  console.log(JSON.stringify(newRow));
-
   const values: string[][] = [];
   values.push(newRow);
 
@@ -93,8 +91,8 @@ export const POST: RequestHandler = async ({ request }) => {
   return json(newRow);
 };
 
-async function updateRow(row: string[], index: number, range: string) {
-  const rangeToUpdate: string = range.charAt(0) + index + 2 + ":" + range.split(":")[1] + index + 2;
+async function updateRow(row: string[], index: number, rangeStart: string, rangeEnd: string) {
+  const rangeToUpdate: string = rangeStart + index + 2 + ":" + rangeEnd + index + 2;
   console.log(`Preparing to update row: ${rangeToUpdate}`);
 
   await sheets.spreadsheets.values.update({
