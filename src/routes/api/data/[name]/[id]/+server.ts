@@ -16,7 +16,7 @@ export const PUT: RequestHandler = async ({ request }) => {
   
   const updateRow: string[] = await request.json();
   const rowIndex = parseInt(updateRow[updateRow.length - 1]) + 2;
-  updateRow.splice(updateRow.length - 2, 1);
+  updateRow.splice(updateRow.length - 1, 1);
   const values: string[][] = [];
   values.push(updateRow);
 
@@ -30,7 +30,7 @@ export const PUT: RequestHandler = async ({ request }) => {
       }
     });
   } catch (err) {
-    console.error(err);
+    console.log(JSON.stringify(err));
   }
 
   return json(updateRow);

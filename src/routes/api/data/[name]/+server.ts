@@ -54,7 +54,7 @@ export const GET: RequestHandler = async ( {params, fetch} ) => {
           updateRow(row, i, config.range);
         }
 
-        while(row.length < headers.length)
+        while(row.length < headers.length - 1)
           row.push("");
 
         row.push(i.toString());
