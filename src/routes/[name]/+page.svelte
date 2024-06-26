@@ -60,7 +60,7 @@
       setData(result);
     });
 
-    fetch("/api/usage", {
+    fetch("/api/data/" + data.dataName + "/usage", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -15,6 +15,7 @@ export class AppService {
   data: {[key: string]: {headers: string[], rows: string[][]}} = {};
   sheetConfig: {[key: string]: DataConfig | undefined} = {};
   testMode: boolean = false;
+  
   setHeaderAction: (buttonText: string) => void = (fds: string) => {
     console.log(fds);
   };

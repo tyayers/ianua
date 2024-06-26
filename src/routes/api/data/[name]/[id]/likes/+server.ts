@@ -1,7 +1,8 @@
+import type { DataConfig } from "$lib/interfaces";
 import { json, type RequestHandler } from "@sveltejs/kit";
 import { GoogleAuth } from "google-auth-library";
 import { google } from "googleapis";
-import { PUBLIC_SHEETS_ID } from '$env/static/public';
+import { serverUtils } from "$lib/server.utils";
 
 const auth = new GoogleAuth({
 	scopes: ['https://www.googleapis.com/auth/spreadsheets',
@@ -14,10 +15,18 @@ const sheets = google.sheets({version: 'v4', auth});
 export const PATCH: RequestHandler = async({ params, url}) => {
 
   const id: string | undefined = params.id;
+  const name: string | undefined = params.name;
   const email: string = url.searchParams.get('email') ?? '';
+  let sheetConfig: DataConfig | undefined = undefined;
+  if (!serverUtils.config) {
+    serverUtils.config = await (await fetch("/api/config")).json()
+  }
+
+  if (name)
+    sheetConfig = serverUtils.GetSheetConfig(name);
 
   const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: PUBLIC_SHEETS_ID,
+    spreadsheetId: sheetConfig?.sheetId,
     range: 'A2:M',
   });
   let resultLikes: string = email;
@@ -48,7 +57,7 @@ export const PATCH: RequestHandler = async({ params, url}) => {
     }
 
     await sheets.spreadsheets.values.update({
-      spreadsheetId: '1EinQU0UjbEKGoXd1nNj4CQ3inXW7mqJxGy3-iJ0gnMI',
+      spreadsheetId: sheetConfig?.sheetId,
       range: 'L' + (rowIndex + 2) + ':L' + (rowIndex + 2),
       valueInputOption: "USER_ENTERED",
       requestBody: {
@@ -64,9 +73,19 @@ export const DELETE: RequestHandler = async({ params, url}) => {
 
   const id: string | undefined = params.id;
   const email: string = url.searchParams.get('email') ?? '';
+  const name: string | undefined = params.name;
+
+  let sheetConfig: DataConfig | undefined = undefined;
+
+  if (!serverUtils.config) {
+    serverUtils.config = await (await fetch("/api/config")).json()
+  }
+
+  if (name)
+    sheetConfig = serverUtils.GetSheetConfig(name);
 
   const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: PUBLIC_SHEETS_ID,
+    spreadsheetId: sheetConfig?.sheetId,
     range: 'A2:M',
   });
   let resultLikes: string[] = [email];
@@ -100,7 +119,7 @@ export const DELETE: RequestHandler = async({ params, url}) => {
     }
 
     await sheets.spreadsheets.values.update({
-      spreadsheetId: PUBLIC_SHEETS_ID,
+      spreadsheetId: sheetConfig?.sheetId,
       range: 'L' + (rowIndex + 2) + ':L' + (rowIndex + 2),
       valueInputOption: "USER_ENTERED",
       requestBody: {

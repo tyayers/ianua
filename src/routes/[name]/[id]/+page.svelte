@@ -12,12 +12,11 @@
   let headers: string[] = [];
   let rowConfig: RowConfig | undefined = undefined;
 
-  // let asset: Asset | undefined = undefined;
-  let links: {name: string, link: string}[] = [];
+  let links: {name: string, link: string, icon?: string}[] = [];
+  let youtubeEmbedLink: string = "";
   let likes: string[] = [];
   let rowDate: Date;
   let idIndex: number = -1;
-  let nameIndex: number = -1;
 
   onMount(() => {
     document.title = "Loading...";
@@ -43,15 +42,32 @@
             for(let i=0; i<tempLinks.length; i++) {
               let tempLink = tempLinks[i];
               let tempName = tempLinks[i];
+              let tempIcon = "/slides.svg";
               if (tempName.length > 40 && sheetConfig.tagIndexes["name"])
                 tempName = row[sheetConfig.tagIndexes["name"]];
 
               if (tempLink.startsWith("go/"))
                 tempLink = "http://" + tempLink;
 
+              if (tempLink.startsWith("https://github.com")) {
+                tempIcon = "/github.png";
+                tempName = "Source code assets"
+              }
+              else if (tempLink.startsWith("https://youtu.be")) {
+                tempIcon = "/youtube.webp";
+                tempName = "YouTube recording"
+                let pieces = tempLink.split("/");
+                youtubeEmbedLink = "https://www.youtube.com/embed/" + pieces[pieces.length - 1];
+              }
+              else if (tempLink.startsWith("https://www.googlecloudcommunity.com")) {
+                tempIcon = "/gcloud.png";
+                tempName = "Google Cloud Community post"
+              }
+
               links.push({
                 name: tempName,
-                link: tempLink
+                link: tempLink,
+                icon: tempIcon
               })
             }
           }
@@ -67,7 +83,7 @@
           likes = row[sheetConfig.tagIndexes["likes"]].split(",");
         }
 
-        fetch("/api/usage", {
+        fetch("/api/data/" + data.dataName + "/usage", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -136,7 +152,7 @@
   function openButton(link: string) {
     if (sheetConfig) {
       const nowDate = new Date();
-      fetch("/api/usage", {
+      fetch("/api/data/" + data.dataName + "/usage", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -165,6 +181,12 @@
   </div>
 
   <div class="title" style="">{row[sheetConfig.tagIndexes["title"]]}</div>
+
+  {#if youtubeEmbedLink}
+  <div style="margin-bottom: 24px;">
+    <iframe width="100%" height="315" src={youtubeEmbedLink}></iframe>
+  </div>
+  {/if}
 
   <div class="description">
     {row[sheetConfig.tagIndexes["description"]]}
@@ -219,6 +241,7 @@
   <div class="asset_detail">
     {#each links as link}
       <div>
+        <img src={link.icon} width="18px" alt="Link" style="position: relative; top: 2px;" />
         <a href={link.link} style="color: #3367d6;" target="_blank" on:mousedown={() => openButton(link.link)}>{link.name} <svg
           class="right_content_tip_learnmore"
           width="24px" height="24px"

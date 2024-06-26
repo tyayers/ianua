@@ -11,14 +11,14 @@
 	"/api/data/[name]/schema": [
 		"src/routes/api/data/[name]/schema/+server.ts"
 	],
+	"/api/data/[name]/usage": [
+		"src/routes/api/data/[name]/usage/+server.ts"
+	],
 	"/api/data/[name]/[id]": [
 		"src/routes/api/data/[name]/[id]/+server.ts"
 	],
 	"/api/data/[name]/[id]/likes": [
 		"src/routes/api/data/[name]/[id]/likes/+server.ts"
-	],
-	"/api/usage": [
-		"src/routes/api/usage/+server.ts"
 	],
 	"/api/users": [
 		"src/routes/api/users/+server.ts"

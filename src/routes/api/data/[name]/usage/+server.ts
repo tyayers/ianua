@@ -1,7 +1,7 @@
+import { json, type RequestHandler } from "@sveltejs/kit";
 import { GoogleAuth } from "google-auth-library";
 import { google } from "googleapis";
-import { json, type RequestHandler } from "@sveltejs/kit";
-import type { DataConfig } from "$lib/interfaces";
+import {DataConfig, UsageData} from "$lib/interfaces";
 import { serverUtils } from "$lib/server.utils";
 
 const auth = new GoogleAuth({
@@ -13,40 +13,44 @@ const auth = new GoogleAuth({
 
 const sheets = google.sheets({version: 'v4', auth});
 
-export const PUT: RequestHandler = async ({ request, url, params }) => {
+export const POST: RequestHandler = async ({ request, params }) => {
 
-  const updateRow: string[] = await request.json();
-  const rangeStart = url.searchParams.get("rangeStart") ?? "";
-  const rangeEnd = url.searchParams.get("rangeEnd") ?? "";
-  const name = params.name;
+  const newUsage: UsageData = await request.json();
+  const name: string | undefined = params.name;
+  let sheetConfig: DataConfig | undefined = undefined;
 
   if (!serverUtils.config) {
     serverUtils.config = await (await fetch("/api/config")).json()
   }
 
-  let sheetConfig: DataConfig | undefined = undefined;
   if (name)
     sheetConfig = serverUtils.GetSheetConfig(name);
-  
-  const rowIndex = parseInt(updateRow[updateRow.length - 1]) + 2;
-  updateRow.splice(updateRow.length - 1, 1);
+
   const values: string[][] = [];
-  values.push(updateRow);
+  const newRow: string[] = [];
+
+  newRow[0] = newUsage.id;
+  newRow[1] = newUsage.name;
+  newRow[2] = newUsage.action;
+  newRow[3] = newUsage.dateTime;
+  newRow[4] = newUsage.link;
+  
+  values.push(newRow);
 
   if (sheetConfig) {
     try {
-      await sheets.spreadsheets.values.update({
+      await sheets.spreadsheets.values.append({
         spreadsheetId: sheetConfig.sheetId,
-        range: rangeStart + rowIndex + ":" + rangeEnd + rowIndex,
+        range: 'Usage',
         valueInputOption: "USER_ENTERED",
         requestBody: {
           values: values
         }
       });
     } catch (err) {
-      console.log(JSON.stringify(err));
+      console.error(err);
     }
   }
 
-  return json(updateRow);
-};
+  return json(newUsage);
+}
