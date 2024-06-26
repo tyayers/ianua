@@ -326,20 +326,12 @@
           : "type_chip"}
       >
         {#if selectedTypes.includes(key)}
-          <span class="types_chip_icon">✓ </span>
-          <!-- svelte-ignore a11y-missing-attribute -->
+          <span class="types_chip_icon" style="position: relative; top: -2px; left: 2px;">✓</span>
         {:else}
           <span class="types_chip_icon">{types[key].char}</span>
-
-          <!-- svelte-ignore a11y-missing-attribute -->
-          <!-- <img
-						style="position: relative; top: 3px; margin-right: 4px;"
-						src={types[key].imageUrl}
-						width="18px"
-					/> -->
         {/if}
-        {types[key].name}</span
-      >
+        <span style="float: right; margin-top: 2px;">{types[key].name}</span>
+      </span>
     {/each}
   </div>
 
@@ -527,6 +519,9 @@
     color: #3367d6;
     font-size: 16px;
     font-weight: bold;
+    display: inline-block;
+    width: 18px;
+    margin-right: 6px;
   }
 
   .assets_box {

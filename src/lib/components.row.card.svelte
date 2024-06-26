@@ -93,7 +93,7 @@
 
     {#each categories as category}
       {#if sheetConfig.categoryIcons[category]}
-        <img height="32px" alt="Product" src={sheetConfig.categoryIcons[category]} />
+        <img height="32px" alt="Product" title={category} src={sheetConfig.categoryIcons[category]} />
       {/if}
     {/each}
   </div>
