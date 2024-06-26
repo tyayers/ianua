@@ -45,7 +45,6 @@ declare module '$env/static/private' {
 	export const NVM_BIN: string;
 	export const npm_package_json: string;
 	export const NVM_INC: string;
-	export const REGION: string;
 	export const VSCODE_GIT_ASKPASS_MAIN: string;
 	export const PS1: string;
 	export const VSCODE_GIT_ASKPASS_NODE: string;
@@ -69,7 +68,6 @@ declare module '$env/static/private' {
 	export const npm_config_prefix: string;
 	export const npm_config_npm_version: string;
 	export const NCURSES_NO_UTF8_ACS: string;
-	export const SERVICE_NAME: string;
 	export const TERM: string;
 	export const npm_config_cache: string;
 	export const npm_config_node_gyp: string;
@@ -80,7 +78,6 @@ declare module '$env/static/private' {
 	export const XDG_RUNTIME_DIR: string;
 	export const XCURSOR_THEME: string;
 	export const GDK_BACKEND: string;
-	export const PROJECT_ID: string;
 	export const SOMMELIER_GLAMOR: string;
 	export const DISPLAY: string;
 	export const LD_ARGV0_REL: string;
@@ -98,9 +95,7 @@ declare module '$env/static/private' {
 	export const npm_package_version: string;
 	export const npm_lifecycle_event: string;
 	export const QT_ACCESSIBILITY: string;
-	export const SHEET_ID: string;
 	export const VSCODE_GIT_ASKPASS_EXTRA_ARGS: string;
-	export const SITE_NAME: string;
 	export const npm_config_globalconfig: string;
 	export const npm_config_init_module: string;
 	export const JAVA_HOME: string;
@@ -165,7 +160,6 @@ declare module '$env/dynamic/private' {
 		NVM_BIN: string;
 		npm_package_json: string;
 		NVM_INC: string;
-		REGION: string;
 		VSCODE_GIT_ASKPASS_MAIN: string;
 		PS1: string;
 		VSCODE_GIT_ASKPASS_NODE: string;
@@ -189,7 +183,6 @@ declare module '$env/dynamic/private' {
 		npm_config_prefix: string;
 		npm_config_npm_version: string;
 		NCURSES_NO_UTF8_ACS: string;
-		SERVICE_NAME: string;
 		TERM: string;
 		npm_config_cache: string;
 		npm_config_node_gyp: string;
@@ -200,7 +193,6 @@ declare module '$env/dynamic/private' {
 		XDG_RUNTIME_DIR: string;
 		XCURSOR_THEME: string;
 		GDK_BACKEND: string;
-		PROJECT_ID: string;
 		SOMMELIER_GLAMOR: string;
 		DISPLAY: string;
 		LD_ARGV0_REL: string;
@@ -218,9 +210,7 @@ declare module '$env/dynamic/private' {
 		npm_package_version: string;
 		npm_lifecycle_event: string;
 		QT_ACCESSIBILITY: string;
-		SHEET_ID: string;
 		VSCODE_GIT_ASKPASS_EXTRA_ARGS: string;
-		SITE_NAME: string;
 		npm_config_globalconfig: string;
 		npm_config_init_module: string;
 		JAVA_HOME: string;

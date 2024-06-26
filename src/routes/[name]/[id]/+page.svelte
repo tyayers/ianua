@@ -13,7 +13,7 @@
   let rowConfig: RowConfig | undefined = undefined;
 
   let links: {name: string, link: string, icon?: string}[] = [];
-  let youtubeEmbedLink: string = "";
+  let previewEmbedLink: string = "";
   let likes: string[] = [];
   let rowDate: Date;
   let idIndex: number = -1;
@@ -46,10 +46,10 @@
               if (tempName.length > 40 && sheetConfig.tagIndexes["name"])
                 tempName = row[sheetConfig.tagIndexes["name"]];
 
-              if (tempLink.startsWith("go/"))
+              if (tempLink.startsWith("go/")) {
                 tempLink = "http://" + tempLink;
-
-              if (tempLink.startsWith("https://github.com")) {
+              }
+              else if (tempLink.startsWith("https://github.com")) {
                 tempIcon = "/github.png";
                 tempName = "Source code assets"
               }
@@ -57,11 +57,14 @@
                 tempIcon = "/youtube.webp";
                 tempName = "YouTube recording"
                 let pieces = tempLink.split("/");
-                youtubeEmbedLink = "https://www.youtube.com/embed/" + pieces[pieces.length - 1];
+                previewEmbedLink = "https://www.youtube.com/embed/" + pieces[pieces.length - 1];
               }
               else if (tempLink.startsWith("https://www.googlecloudcommunity.com")) {
                 tempIcon = "/gcloud.png";
                 tempName = "Google Cloud Community post"
+              }
+              else if (tempLink.startsWith("https://docs.google.com")) {
+                previewEmbedLink = tempLink.replace("/edit", "/embed");
               }
 
               links.push({
@@ -182,9 +185,9 @@
 
   <div class="title" style="">{row[sheetConfig.tagIndexes["title"]]}</div>
 
-  {#if youtubeEmbedLink}
+  {#if previewEmbedLink}
   <div style="margin-bottom: 24px;">
-    <iframe width="100%" height="315" src={youtubeEmbedLink}></iframe>
+    <iframe width="100%" height="374" src={previewEmbedLink} title="YouTube video link"></iframe>
   </div>
   {/if}
 
