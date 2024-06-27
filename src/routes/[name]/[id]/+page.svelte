@@ -115,8 +115,9 @@
       likes = likes;
     }
 
-    if (PUBLIC_TEST_MODE != "true" && sheetConfig?.tagIndexes["id"]) {
-      fetch(`/api/data/${row[sheetConfig?.tagIndexes["id"]]}/likes?email=${appService.currentUser?.email}`, {
+    if (PUBLIC_TEST_MODE !== "true" && sheetConfig) {
+      let url = `/api/data/${sheetConfig.name}/${row[sheetConfig?.tagIndexes["id"]]}/likes?email=${appService.currentUser?.email}&row=${row[row.length - 1]}&column="${sheetConfig.tagIndexes["likes"]}"`;
+      fetch(url, {
         method: method
       });
     }

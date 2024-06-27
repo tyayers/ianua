@@ -108,7 +108,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
 };
 
 async function updateRow(row: string[], index: number, rangeStart: string, rangeEnd: string, sheetsId: string) {
-  const rangeToUpdate: string = rangeStart + index + 2 + ":" + rangeEnd + index + 2;
+  const rangeToUpdate: string = rangeStart + (index + 2).toString() + ":" + rangeEnd + (index + 2).toString();
   console.log(`Preparing to update row: ${rangeToUpdate}`);
 
   await sheets.spreadsheets.values.update({

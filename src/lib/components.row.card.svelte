@@ -13,7 +13,7 @@
   $: description = row[sheetConfig.tagIndexes["description"]];
   $: date = row[sheetConfig.tagIndexes["date"]];
   $: audience = row[sheetConfig.tagIndexes["audience"]];
-  $: likes = row[sheetConfig.tagIndexes["likes"]].length > 0 ? row[sheetConfig.tagIndexes["likes"]].split(",") : [];
+  let likes = row[sheetConfig.tagIndexes["likes"]].length > 0 ? row[sheetConfig.tagIndexes["likes"]].split(",") : [];
   $: types = row[sheetConfig.tagIndexes["type"]].split(",").map((item) => {
     return item.trim();
   });
@@ -44,9 +44,9 @@
     }
 
     likes = likes;
-
+    console.log(likes);
     if (PUBLIC_TEST_MODE != "true") {
-      fetch(`/api/data/${id}/likes?email=${appService.currentUser?.email}`, {
+      fetch(`/api/data/${sheetConfig.name}/${id}/likes?email=${appService.currentUser?.email}`, {
         method: method
       });
     }

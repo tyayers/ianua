@@ -46,6 +46,7 @@ declare module '$env/static/private' {
 	export const npm_package_json: string;
 	export const NVM_INC: string;
 	export const VSCODE_GIT_ASKPASS_MAIN: string;
+	export const NODE_OPTIONS: string;
 	export const PS1: string;
 	export const VSCODE_GIT_ASKPASS_NODE: string;
 	export const MANAGERPID: string;
@@ -96,6 +97,7 @@ declare module '$env/static/private' {
 	export const npm_lifecycle_event: string;
 	export const QT_ACCESSIBILITY: string;
 	export const VSCODE_GIT_ASKPASS_EXTRA_ARGS: string;
+	export const VSCODE_INSPECTOR_OPTIONS: string;
 	export const npm_config_globalconfig: string;
 	export const npm_config_init_module: string;
 	export const JAVA_HOME: string;
@@ -161,6 +163,7 @@ declare module '$env/dynamic/private' {
 		npm_package_json: string;
 		NVM_INC: string;
 		VSCODE_GIT_ASKPASS_MAIN: string;
+		NODE_OPTIONS: string;
 		PS1: string;
 		VSCODE_GIT_ASKPASS_NODE: string;
 		MANAGERPID: string;
@@ -211,6 +214,7 @@ declare module '$env/dynamic/private' {
 		npm_lifecycle_event: string;
 		QT_ACCESSIBILITY: string;
 		VSCODE_GIT_ASKPASS_EXTRA_ARGS: string;
+		VSCODE_INSPECTOR_OPTIONS: string;
 		npm_config_globalconfig: string;
 		npm_config_init_module: string;
 		JAVA_HOME: string;
