@@ -58,9 +58,11 @@ export class AppService {
       if (dataConfig) {
         if (!dataConfig.tagIndexes) dataConfig.tagIndexes = {};
         if (!dataConfig.fieldIndexes) dataConfig.fieldIndexes = {};
+        if (!dataConfig.relatedFields) dataConfig.relatedFields = [];
+        // index tags
         headers.forEach((header, i) => {
           const fieldConfig = dataConfig.fields.find(field => field.id === header);
-          if (fieldConfig) {
+          if (fieldConfig && fieldConfig.tags) {
             fieldConfig.tags.forEach((tag) => {
               dataConfig.tagIndexes[tag] = i;
             });
@@ -68,6 +70,12 @@ export class AppService {
           dataConfig.fieldIndexes[header] = i;
         });
 
+        // check related
+        dataConfig.fields.forEach((field) => {
+          if (field.type === "related") {
+            dataConfig.relatedFields.push(field.relatedKey);
+          }
+        })
         this.sheetConfig[name] = dataConfig;
       }
 
@@ -75,16 +83,39 @@ export class AppService {
     }
   }
 
-  GetRowConfig(sheetConfig: DataConfig, row: string[]): RowConfig {
+  GetRowConfig(sheetConfig: DataConfig, headers: string[], row: string[] | undefined = undefined): RowConfig {
     const result: RowConfig = new RowConfig();
 
-    for (const [key, value] of Object.entries(sheetConfig.tagIndexes)) {
-      result.tags[key] = row[value];
-      if (key === "id") result.id = row[value];
-      if (key === "name") result.name = row[value];
+    if (!row) {
+      result.row = Array(headers.length - 1).fill("");
+
+      // Fill any initial values
+      sheetConfig.fields.forEach((field) => {
+        if (field.initialValue) {
+          const rowIndex = headers.indexOf(field.id);
+          if (field.initialValue === "CURRENT_USER" && this.currentUser)
+            result.row[rowIndex] = this.currentUser.email;
+          else if (field.initialValue === "TODAY") {
+            const startDate = new Date();
+            const startDateString: string = (startDate.getMonth() + 1).toString() + "/" + startDate.getDate().toString() + "/" + startDate.getFullYear().toString();
+            result.row[rowIndex] = startDateString;
+          }
+          else
+            result.row[rowIndex] = field.initialValue;
+        }
+      });
+    }
+    else {
+      result.row = row;
     }
 
-    result.row = row;
+    for (const [key, value] of Object.entries(sheetConfig.tagIndexes)) {
+      result.tags[key] = result.row[value];
+      if (key === "id") result.id = result.row[value];
+      if (key === "name") result.name = result.row[value];
+      if (key === "description") result.description = result.row[value];
+      if (key === "date") result.date = result.row[value];
+    }
 
     return result;
   }

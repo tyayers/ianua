@@ -17,7 +17,6 @@ export const PUT: RequestHandler = async ({ request, url, params }) => {
 
   const updateRow: string[] = await request.json();
   const rangeStart = url.searchParams.get("rangeStart") ?? "";
-  const rangeEnd = url.searchParams.get("rangeEnd") ?? "";
   const name = params.name;
 
   if (!serverUtils.config) {
@@ -37,7 +36,7 @@ export const PUT: RequestHandler = async ({ request, url, params }) => {
     try {
       await sheets.spreadsheets.values.update({
         spreadsheetId: sheetConfig.sheetId,
-        range: rangeStart + rowIndex + ":" + rangeEnd + rowIndex,
+        range: rangeStart + rowIndex,
         valueInputOption: "USER_ENTERED",
         requestBody: {
           values: values

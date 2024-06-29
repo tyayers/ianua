@@ -34,6 +34,18 @@
               {field.id}
             </label>
           </div>
+        {:else if field.type === "date"}
+          <div class="input_field_panel">
+            <!-- svelte-ignore a11y-autofocus -->
+            {#if field.autofocus}
+              <!-- svelte-ignore a11y-autofocus -->
+              <input class="input_field" type="text" name={field.id} id={field.id} required bind:value={rowConfig.row[sheetConfig.fieldIndexes[field.id]]} autocomplete="off" autofocus title="Name" />
+            {:else}
+              <input class="input_field" type="text" name={field.id} id={field.id} required bind:value={rowConfig.row[sheetConfig.fieldIndexes[field.id]]} autocomplete="off" title="Name" />
+            {/if}            <label for={field.id} class='input_field_placeholder'>
+              {field.id}
+            </label>
+          </div>
         {:else if field.type === "multiSelect"}
           <div class="form_list">
             <h4>{field.id}</h4>

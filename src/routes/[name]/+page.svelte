@@ -28,7 +28,8 @@
 
   let searchText: string = "";
   let types: { [key: string]: TagData } = {};
-  let products: { [key: string]: TagData } = {};
+  let categories: TagData[] = [];
+  let categoriesOrdered: {[key: string]: TagData} = {};
 
   let selectedTypes: string[] = [];
   let selectedProducts: string[] = [];
@@ -41,12 +42,11 @@
   let dateIndex: number = -1;
   let likesIndex: number = -1;
 
-
   $: {
     let tempSearchText = searchText;
     let tempSelectedTypes = selectedTypes;
     let tempSelectedProducts = selectedProducts;
-    refreshAssets();
+    refreshData();
   }
 
   onMount(() => {
@@ -112,23 +112,42 @@
           return item.trim();
         });
 
-        for (let product of rowCategories) {
-          if (!products[product]) {
-            products[product] = {
-              name: product,
-              char: getLetter(product),
+        for (let category of rowCategories) {
+          if (!sheetConfig.categoryOrder.includes(category)) {
+            const categoryIndex = categories.findIndex(item => item.name === category);
+            if (categoryIndex === -1) {
+            
+              categories.push({
+                name: category,
+                char: getCategoryLetter(category),
+                imageUrl: "/slides.svg",
+              });
+            }
+          }
+          else if (!categoriesOrdered[category]) {
+            categoriesOrdered[category] = {
+              name: category,
+              char: getCategoryLetter(category),
               imageUrl: "/slides.svg",
             };
           }
         }
       }
 
-      refreshAssets();
+      // Sort categories alphabetically
+      categories.sort(function(a, b) {
+        var textA = a.name.toUpperCase();
+        var textB = b.name.toUpperCase();
+        return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+      });
+
+      refreshData();
       types = types;
+      categories = categories;
     }
   }
 
-  function refreshAssets() {
+  function refreshData() {
     // Trigger general refresh
     rowData = rowData;
     
@@ -206,24 +225,19 @@
     return result;
   }
 
-  function getLetter(product: string): string {
-    let result: string = product.toUpperCase().charAt(0);
-    if (product == "Apigee hybrid") result = "H";
-    else if (product == "Apigee X") result = "X";
-    else if (product == "Application Integration") result = "AIP";
-    else if (product == "Cloud Functions / Cloud Run") result = "F";
+  function getCategoryLetter(category: string): string {
+    let result: string = category.toUpperCase().charAt(0);
+    if (sheetConfig?.categoryAbbreviations[category])
+      result = sheetConfig?.categoryAbbreviations[category];
+
     return result;
   }
 
   function getTypeLetter(type: string): string {
     let result: string = type.toUpperCase().charAt(0);
-    if (type == "Deck") result = "🖵";
-    else if (type == "Drive Folder") result = "🖴";
-    else if (type == "OSS") result = "🕮";
-    else if (type == "Recording") result = "🖭";
-    else if (type == "Tutorial") result = "🗎";
-    else if (type == "Demo") result = "⋈";
-    else if (type == "Tooling") result = "🖰";
+    if (sheetConfig?.typeAbbreviations[type])
+      result = sheetConfig?.typeAbbreviations[type];
+
     return result;
   }
 
@@ -289,26 +303,51 @@
       placeholder="Filter assets"
     />
     <div class="banner_products_box">
-      {#each Object.keys(products) as key}
+      {#if sheetConfig && sheetConfig.categoryOrder}
+        {#each sheetConfig.categoryOrder as category}
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <div
+            on:click|stopPropagation={() => clickProduct(categoriesOrdered[category].name)}
+            class="banner_product"
+          >
+            <div
+              class={selectedProducts.includes(categoriesOrdered[category].name)
+                ? "banner_product_icon banner_product_icon_selected"
+                : "banner_product_icon"}
+            >
+              <!-- svelte-ignore a11y-missing-attribute -->
+              <!-- <img width="24px" src={products[key].imageUrl} /> -->
+              <span style="color: #3367d6; font-size: 22px; font-weight: bold;"
+                >{categoriesOrdered[category].char}</span
+              >
+            </div>
+            <div style="margin-top: 8px;">
+              {categoriesOrdered[category].name}
+            </div>
+          </div>
+        {/each}
+      {/if}
+      {#each categories as category}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-no-static-element-interactions -->
         <div
-          on:click|stopPropagation={() => clickProduct(key)}
+          on:click|stopPropagation={() => clickProduct(category.name)}
           class="banner_product"
         >
           <div
-            class={selectedProducts.includes(key)
+            class={selectedProducts.includes(category.name)
               ? "banner_product_icon banner_product_icon_selected"
               : "banner_product_icon"}
           >
             <!-- svelte-ignore a11y-missing-attribute -->
             <!-- <img width="24px" src={products[key].imageUrl} /> -->
             <span style="color: #3367d6; font-size: 22px; font-weight: bold;"
-              >{products[key].char}</span
+              >{category.char}</span
             >
           </div>
           <div style="margin-top: 8px;">
-            {products[key].name}
+            {category.name}
           </div>
         </div>
       {/each}
@@ -482,7 +521,7 @@
   }
 
   .types_box {
-    margin-top: 214px;
+    margin-top: 264px;
     /* margin-left: 58px; */
     max-width: 1000px;
     margin-left: auto;

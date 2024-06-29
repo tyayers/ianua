@@ -24,7 +24,7 @@
         let tempRow = result.rows.find(item => item[idIndex] === data.rowId);
         if (tempRow) {
           row = tempRow;
-          rowConfig = appService.GetRowConfig(sheetConfig, row);
+          rowConfig = appService.GetRowConfig(sheetConfig, result.headers, row);
 
           document.title = rowConfig.name;
         }
@@ -37,7 +37,7 @@
   }
 
   function submit() {
-    fetch("/api/data/" + sheetConfig?.name + "/" + row[idIndex] + "?rangeStart=" + sheetConfig?.rangeStart + "&rangeEnd=" + sheetConfig?.rangeEnd, {
+    fetch("/api/data/" + sheetConfig?.name + "/" + row[idIndex] + "?rangeStart=" + sheetConfig?.rangeStart, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json"
@@ -49,7 +49,8 @@
     }).then((result: Asset) => {
       // if (result)
       //   appService.assets.push(result);
-      goto("/");
+      // goto("/");
+      history.back();
     });
   }
 

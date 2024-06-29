@@ -21,26 +21,9 @@
       if (sheetConfig) {
         appService.setHeaderAction("SAVE");
         idIndex = sheetConfig?.tagIndexes["id"];
-        rowConfig.row = Array(result.headers.length - 1).fill("");
-
-        // Fill any initial values
-        sheetConfig.fields.forEach((field) => {
-          if (field.initialValue) {
-            let rowIndex = result.headers.indexOf(field.id);
-            if (field.initialValue === "CURRENT_USER" && appService.currentUser)
-              rowConfig.row[rowIndex] = appService.currentUser.email;
-            else if (field.initialValue === "TODAY") {
-              let startDate = new Date();
-              let startDateString: string = (startDate.getMonth() + 1).toString() + "/" + startDate.getDate().toString() + "/" + startDate.getFullYear().toString();
-              rowConfig.row[rowIndex] = startDateString;
-            }
-            else
-              rowConfig.row[rowIndex] = field.initialValue;
-          }
-        });
+        rowConfig = appService.GetRowConfig(sheetConfig, result.headers);
       }
     });
-
 
     document.addEventListener("headerAction", () => {
       submit();
@@ -69,7 +52,7 @@
         result.push((appService.data[sheetConfig.name].rows.length).toString());
         appService.data[sheetConfig.name].rows.push(result);
       }
-      goto("/");
+      goto(`/${sheetConfig?.name}`);
     });
   }
 

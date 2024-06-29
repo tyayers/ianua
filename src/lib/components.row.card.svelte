@@ -13,11 +13,11 @@
   $: description = row[sheetConfig.tagIndexes["description"]];
   $: date = row[sheetConfig.tagIndexes["date"]];
   $: audience = row[sheetConfig.tagIndexes["audience"]];
-  let likes = row[sheetConfig.tagIndexes["likes"]].length > 0 ? row[sheetConfig.tagIndexes["likes"]].split(",") : [];
-  $: types = row[sheetConfig.tagIndexes["type"]].split(",").map((item) => {
+  let likes = sheetConfig.tagIndexes["likes"] && row[sheetConfig.tagIndexes["likes"]].length > 0 ? row[sheetConfig.tagIndexes["likes"]].split(",") : [];
+  $: types = !sheetConfig.tagIndexes["type"] ? [] : row[sheetConfig.tagIndexes["type"]].split(",").map((item) => {
     return item.trim();
   });
-  $: categories = row[sheetConfig.tagIndexes["category"]].split(",").map((item) => {
+  $: categories = !sheetConfig.tagIndexes["category"] ? [] : row[sheetConfig.tagIndexes["category"]].split(",").map((item) => {
     return item.trim();
   });
   
@@ -46,7 +46,8 @@
     likes = likes;
     console.log(likes);
     if (PUBLIC_TEST_MODE != "true") {
-      fetch(`/api/data/${sheetConfig.name}/${id}/likes?email=${appService.currentUser?.email}`, {
+      let url = `/api/data/${sheetConfig.name}/${id}/likes?email=${appService.currentUser?.email}&row=${row[row.length - 1]}&column=${sheetConfig.tagIndexes["likes"]}`;
+      fetch(url, {
         method: method
       });
     }
@@ -97,9 +98,17 @@
       {/if}
     {/each}
   </div>
-  {name}
+  {#if name}
+    {name}
+  {:else}
+    {id}
+  {/if}
   <div class="card_owner_box">
-    {daysAgo(new Date(date)) + " days ago"} - {audience}
+    {daysAgo(new Date(date)) + " days ago"}
+    {#if audience}
+       - 
+      {audience}
+    {/if}
   </div>
   <div class="card_description_box">
     {description}

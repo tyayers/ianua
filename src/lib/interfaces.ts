@@ -94,11 +94,17 @@ export class DataConfig {
   name: string;
   rangeStart: string;
   rangeEnd: string;
+  rowStart: number = 1;
   tagIndexes: {[key: string]: number} = {};
   fieldIndexes: {[key: string]: number} = {};
   typeColors: {[key: string]: string} = {};
+  typeAbbreviations: {[key: string]: string} = {};
   categoryIcons: {[key: string]: string} = {};
+  categoryAbbreviations: {[key: string]: string} = {};
+  categoryOrder: string[] = [];
   fields: FieldConfig[] = [];
+  relatedFields: string[] = [];
+  prompt: string = "";
 
   constructor(sheetId: string, name: string, rangeStart: string, rangeEnd: string) {
     this.sheetId = sheetId;
@@ -110,11 +116,12 @@ export class DataConfig {
 
 export class FieldConfig {
   id: string;
-  type: string;
+  type: string = "string";
   autofocus: boolean = false;
   tags: string[] = [];
   visability: string;
   initialValue: string;
+  relatedKey: string = "";
   values: string[];
 
   constructor(id: string, type: string, visability: string, initialValue: string, values: string[]) {
@@ -129,6 +136,8 @@ export class FieldConfig {
 export class RowConfig {
   id: string = "";
   name: string = "";
+  description: string = "";
+  date: string = "";
   tags: {[key: string]: string} = {}
   row: string[] = [];
 }

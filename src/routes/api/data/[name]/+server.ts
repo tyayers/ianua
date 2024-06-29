@@ -32,13 +32,13 @@ export const GET: RequestHandler = async ( {params, fetch} ) => {
   if (sheetConfig) {
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId: sheetConfig.sheetId,
-      range: sheetConfig.rangeStart + "1:" + sheetConfig.rangeEnd,
+      range: `${sheetConfig.rangeStart}${sheetConfig.rowStart}:Z`,
     });
 
     const headersResult = res.data.values;
     if (headersResult && headersResult.length > 0) headers = headersResult[0];
+    sheetConfig.rangeEnd = String.fromCharCode(headers.length+64);
     headers.push("rowNumber");
-
     const res2 = await sheets.spreadsheets.values.get({
       spreadsheetId: sheetConfig.sheetId,
       range: sheetConfig.rangeStart + "2:" + sheetConfig.rangeEnd,
@@ -93,7 +93,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
     try {
       await sheets.spreadsheets.values.append({
         spreadsheetId: sheetConfig.sheetId,
-        range: 'Assets',
+        range: sheetConfig.rangeStart,
         valueInputOption: "USER_ENTERED",
         requestBody: {
           values: values

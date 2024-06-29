@@ -14,12 +14,13 @@ const sheets = google.sheets({version: 'v4', auth});
 
 export const PATCH: RequestHandler = async({ params, url}) => {
 
-  // const id: string | undefined = params.id;
   const name: string | undefined = params.name;
   const email: string = url.searchParams.get('email') ?? '';
   const row: string = url.searchParams.get('row') ?? '';
+  const sheetRow: number = parseInt(row) + 2;
   const column: string = url.searchParams.get('column') ?? '';
   const columnLetter: string = String.fromCharCode((parseInt(column) + 1) +64)
+  let result: string = email;
 
   let sheetConfig: DataConfig | undefined = undefined;
   if (!serverUtils.config) {
@@ -30,45 +31,48 @@ export const PATCH: RequestHandler = async({ params, url}) => {
     sheetConfig = serverUtils.GetSheetConfig(name);
   }
 
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: sheetConfig?.sheetId,
-    range: sheetConfig?.rangeStart + row + ":" + sheetConfig?.rangeEnd + row,
-  });
-  let resultLikes: string = email;
+  if (sheetConfig) {
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetConfig?.sheetId,
+      range: columnLetter + sheetRow + ':' + columnLetter + sheetRow,
+    });
 
-  const rows = res.data.values;
+    let rows = res.data.values;
 
-  if (rows?.length === 1) {
-
-    if (! rows[0][parseInt(column)])
-      rows[0][parseInt(column)] = email;
-    else if (! rows[0][parseInt(column)].includes(email)) {
-      rows[0][parseInt(column)] += "," + email;
-      resultLikes = rows[0][parseInt(column)];
+    if (!rows || rows.length === 0) {
+      rows = [[email]];
+    }
+    else if (rows?.length === 1) {
+      if (! rows[0][0])
+        rows[0][0] = email;
+      else if (! rows[0][0].includes(email)) {
+        rows[0][0] += "," + email;
+        result = rows[0][0];
+      }
     }
 
     await sheets.spreadsheets.values.update({
       spreadsheetId: sheetConfig?.sheetId,
-      range: columnLetter + (parseInt(row) + 2) + ':' + columnLetter + (parseInt(row)),
+      range: columnLetter + sheetRow + ':' + columnLetter + sheetRow,
       valueInputOption: "USER_ENTERED",
       requestBody: {
-        values: [[rows[0][parseInt(column)]]]
+        values: [[rows[0][0]]]
       }
-    });
+    });    
   }
 
-  return json(resultLikes);
+  return json(result);
 };
 
 export const DELETE: RequestHandler = async({ params, url}) => {
 
-  // const id: string | undefined = params.id;
   const name: string | undefined = params.name;
   const email: string = url.searchParams.get('email') ?? '';
   const row: string = url.searchParams.get('row') ?? '';
+  const sheetRow = parseInt(row) + 2;
   const column: string = url.searchParams.get('column') ?? '';
   const columnLetter: string = String.fromCharCode((parseInt(column) + 1) +64)
-
+  let result: string = "";
   let sheetConfig: DataConfig | undefined = undefined;
   if (!serverUtils.config) {
     serverUtils.config = await (await fetch("/api/config")).json()
@@ -78,36 +82,38 @@ export const DELETE: RequestHandler = async({ params, url}) => {
     sheetConfig = serverUtils.GetSheetConfig(name);
   }
 
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: sheetConfig?.sheetId,
-    range: sheetConfig?.rangeStart + row + ":" + sheetConfig?.rangeEnd + row,
-  });
-  let resultLikes: string = email;
-
-  const rows = res.data.values;
-
-  if (rows?.length === 1) {
-
-    if (! rows[0][parseInt(column)].includes(email)) {
-
-      const likes: string[] = rows[0][parseInt(column)].split(",").map(function(item: string) {
-        return item.trim();
-      });
-      const index = likes.indexOf(email);
-      likes.splice(index, 1);
-      rows[0][parseInt(column)] = likes.join(",");
-      resultLikes = rows[0][parseInt(column)];
-    }
-
-    await sheets.spreadsheets.values.update({
+  if (sheetConfig) {
+    const range: string = columnLetter + sheetRow + ':' + columnLetter + sheetRow;
+    const res = await sheets.spreadsheets.values.get({
       spreadsheetId: sheetConfig?.sheetId,
-      range: columnLetter + (parseInt(row) + 2) + ':' + columnLetter + (parseInt(row)),
-      valueInputOption: "USER_ENTERED",
-      requestBody: {
-        values: [[rows[0][parseInt(column)]]]
-      }
+      range: range,
     });
+
+    const rows = res.data.values;
+
+    if (rows?.length === 1) {
+
+      if (rows[0][0].includes(email)) {
+
+        const likes: string[] = rows[0][0].split(",").map(function(item: string) {
+          return item.trim();
+        });
+        const index = likes.indexOf(email);
+        likes.splice(index, 1);
+        rows[0][0] = likes.join(",");
+        result = rows[0][0];
+      }
+
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: sheetConfig?.sheetId,
+        range: columnLetter + sheetRow + ':' + columnLetter + sheetRow,
+        valueInputOption: "USER_ENTERED",
+        requestBody: {
+          values: [[rows[0][0]]]
+        }
+      });
+    }
   }
 
-  return json(resultLikes);
+  return json(result);
 };
