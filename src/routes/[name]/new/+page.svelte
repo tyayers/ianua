@@ -20,7 +20,7 @@
       sheetConfig = appService.GetSheetConfig(data.dataName, headers);
       if (sheetConfig) {
         appService.setHeaderAction("SAVE");
-        idIndex = sheetConfig?.tagIndexes["id"];
+        idIndex = sheetConfig?.tagIndexes["id"][0];
         rowConfig = appService.GetRowConfig(sheetConfig, result.headers);
       }
     });

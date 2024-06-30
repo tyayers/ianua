@@ -16,59 +16,6 @@ export class User {
   }
 }
 
-export class Asset {
-  id: string;
-  row: number;
-  name: string;
-  type: string[] = [];
-  details: string;
-  owner: string;
-  status: AssetStatus = AssetStatus.New;
-  level: string[];
-  audience: string;
-  lastUpdated: string;
-  link: string;
-  products: string[] = [];
-  likes: string[] = [];
-  keywords: string[] = [];
-
-  constructor(id: string, row: number, name: string, type: string[], details: string, owner: string, status: AssetStatus, level: string[], audience: string, lastUpdated: string, link: string, prodcuts: string[], likes: string[], keywords: string[]) {
-    this.id = id;
-    this.row = row;
-    this.name = name;
-    this.type = type;
-    this.details = details;
-    this.owner = owner;
-    this.status = status;
-    this.level = level;
-    this.audience = audience;
-    this.lastUpdated = lastUpdated;
-    this.link = link;
-    this.products = prodcuts;
-    this.likes = likes;
-    this.keywords = keywords;
-  }
-}
-
-export enum AssetStatus {
-  New = "New",
-  InProgress = "In progress",
-  UnderReview = "Under review",
-  Published = "Published",
-  Suspended = "Suspended",
-  Paused = "Paused"
-}
-
-export enum AssetType {
-  Unknown = "Unknown",
-  Deck = "Deck",
-  OSS = "OSS",
-  Doc = "Doc",
-  Sheet = "Sheet",
-  DriveFolder = "DriveFolder",
-  Recording = "Recording"
-}
-
 export class UsageData {
   id: string;
   name: string;
@@ -95,7 +42,7 @@ export class DataConfig {
   rangeStart: string;
   rangeEnd: string;
   rowStart: number = 1;
-  tagIndexes: {[key: string]: number} = {};
+  tagIndexes: {[key: string]: number[]} = {};
   fieldIndexes: {[key: string]: number} = {};
   typeColors: {[key: string]: string} = {};
   typeAbbreviations: {[key: string]: string} = {};

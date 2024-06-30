@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { appService } from "./app-service";
-	import { Asset, AssetType, DataConfig } from "./interfaces";
+	import { DataConfig } from "./interfaces";
 	import { PUBLIC_TEST_MODE } from '$env/static/public';
   import { goto } from "$app/navigation";
   import { assets } from "$app/paths";
@@ -8,16 +8,16 @@
   export let row: string[];
   export let sheetConfig: DataConfig;
 
-  $: id = row[sheetConfig.tagIndexes["id"]];
-  $: name = row[sheetConfig.tagIndexes["name"]];
-  $: description = row[sheetConfig.tagIndexes["description"]];
-  $: date = row[sheetConfig.tagIndexes["date"]];
-  $: audience = row[sheetConfig.tagIndexes["audience"]];
-  let likes = sheetConfig.tagIndexes["likes"] && row[sheetConfig.tagIndexes["likes"]].length > 0 ? row[sheetConfig.tagIndexes["likes"]].split(",") : [];
-  $: types = !sheetConfig.tagIndexes["type"] ? [] : row[sheetConfig.tagIndexes["type"]].split(",").map((item) => {
+  $: id = row[sheetConfig.tagIndexes["id"][0]];
+  $: name = row[sheetConfig.tagIndexes["name"][0]];
+  $: description = row[sheetConfig.tagIndexes["description"][0]];
+  $: date = row[sheetConfig.tagIndexes["date"][0]];
+  $: audience = row[sheetConfig.tagIndexes["audience"][0]];
+  let likes = sheetConfig.tagIndexes["likes"] && row[sheetConfig.tagIndexes["likes"][0]].length > 0 ? row[sheetConfig.tagIndexes["likes"][0]].split(",") : [];
+  $: types = !sheetConfig.tagIndexes["type"] ? [] : row[sheetConfig.tagIndexes["type"][0]].split(",").map((item) => {
     return item.trim();
   });
-  $: categories = !sheetConfig.tagIndexes["category"] ? [] : row[sheetConfig.tagIndexes["category"]].split(",").map((item) => {
+  $: categories = !sheetConfig.tagIndexes["category"] ? [] : row[sheetConfig.tagIndexes["category"][0]].split(",").map((item) => {
     return item.trim();
   });
   
@@ -44,7 +44,8 @@
     }
 
     likes = likes;
-    console.log(likes);
+    row[sheetConfig.tagIndexes["likes"][0]] = likes.join(",");
+    
     if (PUBLIC_TEST_MODE != "true") {
       let url = `/api/data/${sheetConfig.name}/${id}/likes?email=${appService.currentUser?.email}&row=${row[row.length - 1]}&column=${sheetConfig.tagIndexes["likes"]}`;
       fetch(url, {

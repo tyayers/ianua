@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { Asset, AssetStatus, DataConfig, RowConfig } from "$lib/interfaces";
+  import { DataConfig, RowConfig } from "$lib/interfaces";
   import Header from '$lib/components.header.svelte';
   import RowEdit from '$lib/components.row.edit.svelte';
   import { appService } from "$lib/app-service";
@@ -20,7 +20,7 @@
       headers = result.headers;
       sheetConfig = appService.GetSheetConfig(data.dataName, headers);
       if (sheetConfig) {
-        idIndex = sheetConfig?.tagIndexes["id"];
+        idIndex = sheetConfig?.tagIndexes["id"][0];
         let tempRow = result.rows.find(item => item[idIndex] === data.rowId);
         if (tempRow) {
           row = tempRow;
@@ -46,7 +46,7 @@
     }).then((response) => {
       // console.log(`Response ${response.status} - ${response.statusText} from asset post.`);
       return response.json();
-    }).then((result: Asset) => {
+    }).then((result) => {
       // if (result)
       //   appService.assets.push(result);
       // goto("/");

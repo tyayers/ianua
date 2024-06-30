@@ -21,7 +21,7 @@
   let levels: string[] = [];
   let rowDate: Date;
   let idIndex: number = -1;
-  let relatedData: {[key: string]: {prompt: string, sheetConfig: DataConfig, headers: string[], addOpen: boolean, newRow: RowConfig, rows: RowConfig[]}} = {};
+  let relatedData: {[key: string]: {prompt: string, sheetConfig: DataConfig, headers: string[], relatedKey: string, addOpen: boolean, newRow: RowConfig, rows: RowConfig[]}} = {};
 
   onMount(() => {
     document.title = "Loading...";
@@ -30,7 +30,7 @@
       headers = result.headers;
       sheetConfig = appService.GetSheetConfig(data.dataName, headers);
       if (sheetConfig) {
-        idIndex = sheetConfig?.tagIndexes["id"];
+        idIndex = sheetConfig?.tagIndexes["id"][0];
         let tempRow = result.rows.find(item => item[idIndex] === data.rowId);
         if (tempRow) {
           row = tempRow;
@@ -38,7 +38,7 @@
         }
 
         if (sheetConfig && sheetConfig.tagIndexes["link"]) {
-          let link = row[sheetConfig?.tagIndexes["link"]];
+          let link = row[sheetConfig?.tagIndexes["link"][0]];
           let tempLinks = link.split(",").map(link => {
             return link.trim();
           });
@@ -49,7 +49,7 @@
               let tempName = tempLinks[i];
               let tempIcon = "/slides.svg";
               if (tempName.length > 40 && sheetConfig.tagIndexes["name"])
-                tempName = row[sheetConfig.tagIndexes["name"]];
+                tempName = row[sheetConfig.tagIndexes["name"][0]];
 
               if (tempLink.startsWith("go/")) {
                 tempLink = "http://" + tempLink;
@@ -85,25 +85,25 @@
         }
 
         if (sheetConfig?.tagIndexes["date"])
-          rowDate = new Date(row[sheetConfig.tagIndexes["date"]]);
+          rowDate = new Date(row[sheetConfig.tagIndexes["date"][0]]);
         
         if (sheetConfig?.tagIndexes["name"])  
-          document.title = row[sheetConfig.tagIndexes["name"]];
+          document.title = row[sheetConfig.tagIndexes["name"][0]];
 
-        if (sheetConfig.tagIndexes["likes"] && row[sheetConfig.tagIndexes["likes"]]) {
-          likes = row[sheetConfig.tagIndexes["likes"]].split(",");
+        if (sheetConfig.tagIndexes["likes"] && row[sheetConfig.tagIndexes["likes"][0]]) {
+          likes = row[sheetConfig.tagIndexes["likes"][0]].split(",");
         }
 
-        if (sheetConfig.tagIndexes["type"] && row[sheetConfig.tagIndexes["type"]]) {
-          types = row[sheetConfig.tagIndexes["type"]].split(",");
+        if (sheetConfig.tagIndexes["type"] && row[sheetConfig.tagIndexes["type"][0]]) {
+          types = row[sheetConfig.tagIndexes["type"][0]].split(",");
         }
 
-        if (sheetConfig.tagIndexes["category"] && row[sheetConfig.tagIndexes["category"]]) {
-          categories = row[sheetConfig.tagIndexes["category"]].split(",");
+        if (sheetConfig.tagIndexes["category"] && row[sheetConfig.tagIndexes["category"][0]]) {
+          categories = row[sheetConfig.tagIndexes["category"][0]].split(",");
         }
 
-        if (sheetConfig.tagIndexes["level"] && row[sheetConfig.tagIndexes["level"]]) {
-          levels = row[sheetConfig.tagIndexes["level"]].split(",");
+        if (sheetConfig.tagIndexes["level"] && row[sheetConfig.tagIndexes["level"][0]]) {
+          levels = row[sheetConfig.tagIndexes["level"][0]].split(",");
         }
 
         // go through any related data fields
@@ -119,6 +119,7 @@
                   prompt: relatedSheetConfig.prompt,
                   sheetConfig: relatedSheetConfig,
                   headers: relatedRows.headers,
+                  relatedKey: relatedKey,
                   newRow: appService.GetRowConfig(relatedSheetConfig, relatedRows.headers),
                   addOpen: false,
                   rows: []
@@ -128,7 +129,7 @@
                   if (relatedRow[relatedIdIndex] === rowConfig?.id) {
                     // we have a related record
                     if (relatedSheetConfig?.tagIndexes["date"] && relatedSheetConfig?.tagIndexes["description"]) {
-                      relatedData[relatedTable].rows.push(appService.GetRowConfig(relatedSheetConfig, relatedRows.headers, relatedRow));
+                      relatedData[relatedTable].rows.unshift(appService.GetRowConfig(relatedSheetConfig, relatedRows.headers, relatedRow));
                     }
                   }
                 });
@@ -144,7 +145,7 @@
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify(new UsageData(row[sheetConfig.tagIndexes["id"]], row[sheetConfig.tagIndexes["name"]], "VISIT", (new Date()).toString(), ""))
+          body: JSON.stringify(new UsageData(row[sheetConfig.tagIndexes["id"][0]], row[sheetConfig.tagIndexes["name"][0]], "VISIT", (new Date()).toString(), ""))
         }).then((response) => {
           if (response.status != 200) {
             console.error("Could not update usage data - " + response.statusText);
@@ -168,8 +169,11 @@
       likes = likes;
     }
 
+    if (rowConfig && sheetConfig?.tagIndexes["likes"])
+      rowConfig.row[sheetConfig?.tagIndexes["likes"][0]] = likes.join(",");
+
     if (PUBLIC_TEST_MODE !== "true" && sheetConfig) {
-      let url = `/api/data/${sheetConfig.name}/${row[sheetConfig?.tagIndexes["id"]]}/likes?email=${appService.currentUser?.email}&row=${row[row.length - 1]}&column=${sheetConfig.tagIndexes["likes"]}`;
+      let url = `/api/data/${sheetConfig.name}/${row[sheetConfig?.tagIndexes["id"][0]]}/likes?email=${appService.currentUser?.email}&row=${row[row.length - 1]}&column=${sheetConfig.tagIndexes["likes"]}`;
       fetch(url, {
         method: method
       });
@@ -214,7 +218,7 @@
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(new UsageData(row[sheetConfig.tagIndexes["id"]], row[sheetConfig.tagIndexes["name"]], "OPEN", nowDate.toString(), link))
+        body: JSON.stringify(new UsageData(row[sheetConfig.tagIndexes["id"][0]], row[sheetConfig.tagIndexes["name"][0]], "OPEN", nowDate.toString(), link))
       }).then((response) => {
         if (response.status != 200) {
           console.error("Could not update usage data - " + response.statusText);
@@ -232,11 +236,27 @@
 
   function submitAddRelated(relatedName: string) {
     if (relatedData[relatedName]) {
-      relatedData[relatedName].rows.push(appService.GetRowConfig(relatedData[relatedName].sheetConfig, relatedData[relatedName].headers, relatedData[relatedName].newRow.row));
-      relatedData[relatedName].newRow = appService.GetRowConfig(relatedData[relatedName].sheetConfig, relatedData[relatedName].headers);
-    }
 
-    relatedData[relatedName].addOpen = false;
+      let relatedKeyIndex = relatedData[relatedName].headers.indexOf(relatedData[relatedName].relatedKey);
+      relatedData[relatedName].newRow.row[relatedKeyIndex] = data.rowId;
+      relatedData[relatedName].rows.unshift(appService.GetRowConfig(relatedData[relatedName].sheetConfig, relatedData[relatedName].headers, relatedData[relatedName].newRow.row));
+      relatedData[relatedName].newRow = appService.GetRowConfig(relatedData[relatedName].sheetConfig, relatedData[relatedName].headers);
+
+      relatedData[relatedName].addOpen = false;
+
+      // Post to sheet
+      fetch("/api/data/" + relatedName, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(relatedData[relatedName].rows[0].row)
+      }).then((response) => {
+        // console.log(`Response ${response.status} - ${response.statusText} from asset post.`);
+        if (response.status !== 200)
+          console.error(`Error creating ${relatedName} row: ${response.status} - ${response.statusText}.`);
+      });
+    }
   }
 
   function goBack() {
@@ -250,11 +270,11 @@
   {#if sheetConfig && row.length > 0}
     <div class="back_box">
       <button style="float: left;" class="back_button" on:click={goBack}><svg data-icon-name="arrowBackIcon" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill-rule="evenodd" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"></path></svg></button>
-      <a style="float: right; position: relative; top: 22px; left: -18px; color: #4285f4;" href={"/" + data.dataName + "/" + row[sheetConfig.tagIndexes["id"]] + "/edit"}>Edit</a>
+      <a style="float: right; position: relative; top: 22px; left: -18px; color: #4285f4;" href={"/" + data.dataName + "/" + row[sheetConfig.tagIndexes["id"][0]] + "/edit"}>Edit</a>
     </div>
 
     {#if sheetConfig.tagIndexes["title"]}
-      <div class="title" style="">{row[sheetConfig.tagIndexes["title"]]}</div>
+      <div class="title" style="">{row[sheetConfig.tagIndexes["title"][0]]}</div>
     {/if}
 
     {#if previewEmbedLink}
@@ -263,9 +283,9 @@
       </div>
     {/if}
 
-    {#if sheetConfig.tagIndexes["description"]}
+    {#if rowConfig}
       <div class="description">
-        {row[sheetConfig.tagIndexes["description"]]}
+        {rowConfig.description}
       </div>
     {/if}
 
@@ -274,11 +294,11 @@
       {#if sheetConfig.tagIndexes["status"] || sheetConfig.tagIndexes["audience"]}
         <div class="block" style="font-weight: bold; margin-top: 4px; width: 100%;">
           {#if sheetConfig.tagIndexes["status"]}
-            {row[sheetConfig.tagIndexes["status"]]}
+            {row[sheetConfig.tagIndexes["status"][0]]}
           {/if}
           - 
           {#if sheetConfig.tagIndexes["audience"]} 
-            {row[sheetConfig.tagIndexes["audience"]]}
+            {row[sheetConfig.tagIndexes["audience"][0]]}
           {/if}
         </div>
       {/if}
@@ -312,13 +332,13 @@
 
     {#if sheetConfig.tagIndexes["user"]}
       <div class="block">
-        By <a href={"https://moma.corp.google.com/search?q=" + row[sheetConfig.tagIndexes["user"]]} target="_blank" style="font-weight: bold; color: #3367d6;">{row[sheetConfig.tagIndexes["user"]]}</a>
+        By <a href={"https://moma.corp.google.com/search?q=" + row[sheetConfig.tagIndexes["user"][0]]} target="_blank" style="font-weight: bold; color: #3367d6;">{row[sheetConfig.tagIndexes["user"][0]]}</a>
       </div>
     {/if}
 
     {#if sheetConfig.tagIndexes["date"]}
       <div class="block" style="margin-top: 4px;">
-        {row[sheetConfig.tagIndexes["date"]]}
+        {row[sheetConfig.tagIndexes["date"][0]]}
       </div>
     {/if}
 
@@ -416,7 +436,7 @@
   .page {
     max-width: 600px;
     margin-top: 64px;
-    margin-bottom: 44px;
+    margin-bottom: 204px;
     margin-left: auto;
     margin-right: auto;
   }

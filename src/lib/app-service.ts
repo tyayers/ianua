@@ -64,7 +64,8 @@ export class AppService {
           const fieldConfig = dataConfig.fields.find(field => field.id === header);
           if (fieldConfig && fieldConfig.tags) {
             fieldConfig.tags.forEach((tag) => {
-              dataConfig.tagIndexes[tag] = i;
+              if (!dataConfig.tagIndexes[tag]) dataConfig.tagIndexes[tag] = [];
+              dataConfig.tagIndexes[tag].push(i);
             });
           }
           dataConfig.fieldIndexes[header] = i;
@@ -110,11 +111,21 @@ export class AppService {
     }
 
     for (const [key, value] of Object.entries(sheetConfig.tagIndexes)) {
-      result.tags[key] = result.row[value];
-      if (key === "id") result.id = result.row[value];
-      if (key === "name") result.name = result.row[value];
-      if (key === "description") result.description = result.row[value];
-      if (key === "date") result.date = result.row[value];
+      value.forEach(index => {
+        if (result.tags[key])
+          result.tags[key] += " - " + result.row[index];
+        else
+          result.tags[key] = result.row[index];
+        if (key === "id") result.id = result.row[index];
+        if (key === "name") result.name = result.row[index];
+        if (key === "description") {
+          if (result.description)
+            result.description += " - " + result.row[index];
+          else
+            result.description = result.row[index];
+        }
+        if (key === "date") result.date = result.row[index];
+      });
     }
 
     return result;

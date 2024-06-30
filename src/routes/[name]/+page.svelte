@@ -3,8 +3,7 @@
   import type { PageServerData } from "./$types";
   import RowCard from "$lib/components.row.card.svelte";
   import Header from "$lib/components.header.svelte";
-  import { Config, DataConfig, UsageData, type Asset } from "$lib/interfaces";
-  import { PUBLIC_TEST_MODE } from "$env/static/public";
+  import { DataConfig, UsageData } from "$lib/interfaces";
   import { appService } from "$lib/app-service";
   import { goto } from "$app/navigation";
 
@@ -83,12 +82,12 @@
     if (sheetConfig) {
       appService.SetHeaderAction("+ Add " + sheetConfig?.name);
 
-      nameIndex = sheetConfig.tagIndexes["name"];
-      descriptionIndex = sheetConfig.tagIndexes["description"];
-      typeIndex = sheetConfig.tagIndexes["type"];
-      categoryIndex = sheetConfig.tagIndexes["category"];
-      dateIndex = sheetConfig.tagIndexes["date"];
-      likesIndex = sheetConfig.tagIndexes["likes"];
+      nameIndex = sheetConfig.tagIndexes["name"][0];
+      descriptionIndex = sheetConfig.tagIndexes["description"][0];
+      typeIndex = sheetConfig.tagIndexes["type"][0];
+      categoryIndex = sheetConfig.tagIndexes["category"][0];
+      dateIndex = sheetConfig.tagIndexes["date"][0];
+      likesIndex = sheetConfig.tagIndexes["likes"][0];
 
       for (let row of rowData.rows) {
 
@@ -175,7 +174,7 @@
     latestRows = latestRows;
 
     // Calculate most liked
-    let newHighestRatedAssets = [];
+    let newHighestRatedRows = [];
     if (likesIndex) {
       rowData.rows.sort((a, b) => {
         let result = -1;
@@ -190,13 +189,13 @@
 
       for (let i = 0; i < rowData.rows.length; i++) {
         if (checkRow(rowData.rows[i])) {
-          newHighestRatedAssets.push(rowData.rows[i]);
+          newHighestRatedRows.push(rowData.rows[i]);
         }
 
-        if (newHighestRatedAssets.length > 5) break;
+        if (newHighestRatedRows.length > 5) break;
       }
     }
-    highestRatedRows = newHighestRatedAssets;
+    highestRatedRows = newHighestRatedRows;
 
     // Sort main list alphabetically
     rowData.rows.sort(function(a, b) {

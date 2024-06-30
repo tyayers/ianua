@@ -93,7 +93,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
     try {
       await sheets.spreadsheets.values.append({
         spreadsheetId: sheetConfig.sheetId,
-        range: sheetConfig.rangeStart,
+        range: sheetConfig.rangeStart + ":" + sheetConfig.rangeEnd,
         valueInputOption: "USER_ENTERED",
         requestBody: {
           values: values
