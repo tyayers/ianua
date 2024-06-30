@@ -11,8 +11,12 @@
     console.log(buttonText);
   });
 
+  export let showAlertButton: boolean = false;
+  export let alerts: {date: string, alert: string}[] = [];
+  
   let currentUser: User | undefined = appService.currentUser;
   let menuVisible: boolean = false;
+  let alertsVisible: boolean = false;
 
   onMount(async () => {
 
@@ -22,6 +26,7 @@
 
     document.addEventListener("cancelEvent", () => {
       menuVisible = false;
+      alertsVisible = false;
     });
   });
 
@@ -43,6 +48,16 @@
     document.dispatchEvent(event);
 
     goto("/");
+  }
+
+  function profileClick() {
+    menuVisible = !menuVisible;
+    alertsVisible = false;
+  }
+
+  function alertClick() {
+    alertsVisible = !alertsVisible;
+    menuVisible = false;
   }
 
   function triggerAction() {
@@ -68,17 +83,41 @@
         <button style={"position: relative; top: -14px; left: -28px; background-color: " + actionButtonColor + "; color: " + actionButtonTextColor} on:click|stopPropagation={triggerAction} class="rounded_button_outlined">{actionButtonText}</button>
       {/if}
 
-      <button style="position: relative; top: -4px; left: -10px;" class="back_button">
-        <svg width="100%" height="100%" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false"><path fill="#333" d="M18 17v-6c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v6H4v2h16v-2h-2zm-2 0H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6zm-4 5c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2z"></path></svg>
-      </button>
+      {#if showAlertButton}
+        <button style="position: relative; top: -4px; left: -10px;" class="back_button" on:click|stopPropagation={alertClick}>
+          <svg width="100%" height="100%" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false"><path fill="#333" d="M18 17v-6c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v6H4v2h16v-2h-2zm-2 0H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6zm-4 5c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2z"></path></svg>
+        </button>
+        {#if alerts.length > 0}
+          <span>{alerts.length}</span>
+        {/if}
+      {/if}
 
       <button
-        on:click|stopPropagation={() => { menuVisible = !menuVisible; }}
-        on:keydown|stopPropagation={() => { menuVisible = !menuVisible; }}
+        on:click|stopPropagation={profileClick}
+        on:keydown|stopPropagation={profileClick}
         class="profile_button"
       >
         <img class="profile_button_image" src={currentUser.photoUrl} onerror="this.src='/avatar.png';" alt="The user's profile." />
       </button>
+
+      {#if alertsVisible}
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <div class="menuPanel" on:click|stopPropagation={() => {}} style="right: 64px; min-height: 80px; max-height: 400px; overflow-y: auto; height: auto;">
+          <div class="arrow" />
+          <div class="menu" style="height: auto;">
+            {#if alerts.length === 0}
+              <div style="margin-left: auto; margin-right: auto; padding-top: 24px; font-size: 18px; color: lightgray; text-align: center;">No alerts</div>
+            {:else}
+              {#each alerts as alert}
+                <div>
+                  {alert.date + " - " + alert.alert}
+                </div>
+              {/each}
+            {/if}
+          </div>
+        </div>
+      {/if}
 
       {#if menuVisible}
         <!-- svelte-ignore a11y-no-static-element-interactions -->

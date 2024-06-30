@@ -41,6 +41,8 @@
   let dateIndex: number = -1;
   let likesIndex: number = -1;
 
+  let newRows: {date: string, alert: string}[] = [];
+
   $: {
     let tempSearchText = searchText;
     let tempSelectedTypes = selectedTypes;
@@ -131,7 +133,14 @@
             };
           }
         }
+
+        newRows.push({
+          date: row[sheetConfig.tagIndexes["date"][0]],
+          alert: row[sheetConfig.tagIndexes["name"][0]]
+        });
       }
+
+      newRows = newRows;
 
       // Sort categories alphabetically
       categories.sort(function(a, b) {
@@ -270,7 +279,7 @@
   }
 </script>
 
-<Header actionButtonText="+ Add" actionEvent={actionAdd} />
+<Header actionButtonText="+ Add" actionEvent={actionAdd} showAlertButton={true} alerts={newRows} />
 
 <div class="home_box">
   <div class="hero_box">
