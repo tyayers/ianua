@@ -41,7 +41,7 @@ export const GET: RequestHandler = async ( {params, fetch} ) => {
     headers.push("rowNumber");
     const res2 = await sheets.spreadsheets.values.get({
       spreadsheetId: sheetConfig.sheetId,
-      range: sheetConfig.rangeStart + "2:" + sheetConfig.rangeEnd,
+      range: `${sheetConfig.rangeStart}${sheetConfig.rowStart + 1}:${sheetConfig.rangeEnd}`,
     });
     rows = res2.data.values;
 

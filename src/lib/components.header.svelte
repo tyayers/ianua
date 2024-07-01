@@ -12,11 +12,13 @@
   });
 
   export let showAlertButton: boolean = false;
-  export let alerts: {date: string, alert: string}[] = [];
+  export let alerts: {date: string, alert: string, link: string}[] = [];
+  export let alertsClick: () => void = () => {};
   
   let currentUser: User | undefined = appService.currentUser;
   let menuVisible: boolean = false;
   let alertsVisible: boolean = false;
+  let badgeVisible: boolean = true;
 
   onMount(async () => {
 
@@ -58,6 +60,10 @@
   function alertClick() {
     alertsVisible = !alertsVisible;
     menuVisible = false;
+    badgeVisible = false;
+    if (alertsClick) {
+      alertsClick();
+    }
   }
 
   function triggerAction() {
@@ -87,8 +93,8 @@
         <button style="position: relative; top: -4px; left: -10px;" class="back_button" on:click|stopPropagation={alertClick}>
           <svg width="100%" height="100%" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false"><path fill="#333" d="M18 17v-6c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v6H4v2h16v-2h-2zm-2 0H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6zm-4 5c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2z"></path></svg>
         </button>
-        {#if alerts.length > 0}
-          <span>{alerts.length}</span>
+        {#if alerts.length > 0 && badgeVisible}
+          <span class="alert_badge">{alerts.length}</span>
         {/if}
       {/if}
 
@@ -103,15 +109,22 @@
       {#if alertsVisible}
         <!-- svelte-ignore a11y-no-static-element-interactions -->
         <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <div class="menuPanel" on:click|stopPropagation={() => {}} style="right: 64px; min-height: 80px; max-height: 400px; overflow-y: auto; height: auto;">
+        <div class="menuPanel" on:click|stopPropagation={() => {}} style="right: 64px; min-height: 80px; max-height: 600px; overflow-y: auto; height: auto;">
           <div class="arrow" />
-          <div class="menu" style="height: auto;">
+          <div class="menu" style="height: auto; width: 364px;">
             {#if alerts.length === 0}
               <div style="margin-left: auto; margin-right: auto; padding-top: 24px; font-size: 18px; color: lightgray; text-align: center;">No alerts</div>
             {:else}
               {#each alerts as alert}
-                <div>
-                  {alert.date + " - " + alert.alert}
+                <div class="alert_box">
+                  <a href={alert.link} target="_blank">
+                    <div style="color: #afafaf; font-size: 14px; padding-left: 8px; padding-top: 8px;">
+                      {alert.date}
+                    </div>
+                    <div style="font-weight: normal; padding-top: 4px; padding-left: 8px; padding-bottom: 12px;">
+                      {alert.alert}
+                    </div>
+                  </a>
                 </div>
               {/each}
             {/if}
@@ -164,7 +177,7 @@
 
     height: var(--header-height);
     background-color: rgba(255, 255, 255, 1);
-    width: 100vw;
+    /* width: 100vw; */
     /* border-bottom: solid 1px rgba(222, 222, 222, 1); */
 
     font-weight: 560;
@@ -202,6 +215,29 @@
   .header_right_panel1 {
     margin-top: 7px;
     margin-right: 24px;
+  }
+
+  .alert_badge {
+    position: absolute;
+    z-index: 3;
+    right: 75px;
+    top: 28px;
+    background: red;
+    border-radius: 24px;
+    padding: 4px;
+    font-size: 12px;
+    color: white;
+    min-width: 13px;
+    text-align: center;
+  }
+
+  .alert_box {
+
+  }
+
+  .alert_box:hover {
+    background-color: #f4f4f4;
+    cursor: pointer;
   }
 
   .profile_button {

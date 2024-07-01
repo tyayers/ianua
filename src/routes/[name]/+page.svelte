@@ -6,6 +6,7 @@
   import { DataConfig, UsageData } from "$lib/interfaces";
   import { appService } from "$lib/app-service";
   import { goto } from "$app/navigation";
+    import { browser } from "$app/environment";
 
   export let data: PageServerData;
 
@@ -41,13 +42,13 @@
   let dateIndex: number = -1;
   let likesIndex: number = -1;
 
-  let newRows: {date: string, alert: string}[] = [];
+  let newRows: {date: string, alert: string, link: string}[] = [];
 
   $: {
     let tempSearchText = searchText;
     let tempSelectedTypes = selectedTypes;
     let tempSelectedProducts = selectedProducts;
-    refreshData();
+    if (browser) refreshData();
   }
 
   onMount(() => {
@@ -134,13 +135,7 @@
           }
         }
 
-        newRows.push({
-          date: row[sheetConfig.tagIndexes["date"][0]],
-          alert: row[sheetConfig.tagIndexes["name"][0]]
-        });
       }
-
-      newRows = newRows;
 
       // Sort categories alphabetically
       categories.sort(function(a, b) {
@@ -172,18 +167,32 @@
       });
     }
 
+
+    let lastRead = localStorage.getItem(sheetConfig?.name + ".lastRead");
     latestRows = [];
     for (let i = 0; i < rowData.rows.length; i++) {
-      if (checkRow(rowData.rows[i])) {
-        latestRows.push(rowData.rows[i]);
+      if (lastRead && sheetConfig?.tagIndexes["date"]) {
+        let rowDate = new Date(rowData.rows[i][sheetConfig.tagIndexes["date"][0]]);
+        let lastReadDate = new Date(lastRead);
+        if (rowDate > lastReadDate) {
+          newRows.push({date: rowData.rows[i][sheetConfig.tagIndexes["date"][0]], alert: rowData.rows[i][sheetConfig.tagIndexes["name"][0]], link: "/" + sheetConfig.name + "/" + rowData.rows[i][sheetConfig.tagIndexes["id"][0]]});
+        }
+      } else if (sheetConfig) {
+        newRows.push({date: rowData.rows[i][sheetConfig.tagIndexes["date"][0]], alert: rowData.rows[i][sheetConfig.tagIndexes["name"][0]], link: "/" + sheetConfig.name + "/" + rowData.rows[i][sheetConfig.tagIndexes["id"][0]]});
       }
 
-      if (latestRows.length > 2) break;
+      if (checkRow(rowData.rows[i])) {
+        if (latestRows.length <= 2)
+          latestRows.push(rowData.rows[i]);
+      }
+
+      if (newRows.length > 19 || latestRows.length > 19) break;
     }
     latestRows = latestRows;
+    newRows = newRows;
 
     // Calculate most liked
-    let newHighestRatedRows = [];
+    highestRatedRows = [];
     if (likesIndex) {
       rowData.rows.sort((a, b) => {
         let result = -1;
@@ -198,13 +207,13 @@
 
       for (let i = 0; i < rowData.rows.length; i++) {
         if (checkRow(rowData.rows[i])) {
-          newHighestRatedRows.push(rowData.rows[i]);
+          highestRatedRows.push(rowData.rows[i]);
         }
 
-        if (newHighestRatedRows.length > 5) break;
+        if (highestRatedRows.length > 5) break;
       }
     }
-    highestRatedRows = newHighestRatedRows;
+    highestRatedRows = highestRatedRows;
 
     // Sort main list alphabetically
     rowData.rows.sort(function(a, b) {
@@ -277,9 +286,16 @@
     if (sheetConfig)
       goto("/" + sheetConfig.name + "/new");
   }
+
+  function alertsClick() {
+    const nowDate = new Date();
+    const nowDateString: string = (nowDate.getMonth() + 1).toString() + "/" + nowDate.getDate().toString() + "/" + nowDate.getFullYear().toString();
+
+    localStorage.setItem(sheetConfig?.name + ".lastRead", nowDateString);
+  }
 </script>
 
-<Header actionButtonText="+ Add" actionEvent={actionAdd} showAlertButton={true} alerts={newRows} />
+<Header actionButtonText="+ Add" actionEvent={actionAdd} showAlertButton={true} alerts={newRows} {alertsClick} />
 
 <div class="home_box">
   <div class="hero_box">
@@ -373,7 +389,7 @@
           : "type_chip"}
       >
         {#if selectedTypes.includes(key)}
-          <span class="types_chip_icon" style="position: relative; top: -2px; left: 2px;">✓</span>
+          <span class="types_chip_icon" style="position: relative; left: 2px;">✓</span>
         {:else}
           <span class="types_chip_icon">{types[key].char}</span>
         {/if}

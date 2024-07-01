@@ -13,10 +13,13 @@
   $: description = row[sheetConfig.tagIndexes["description"][0]];
   $: date = row[sheetConfig.tagIndexes["date"][0]];
   $: audience = row[sheetConfig.tagIndexes["audience"][0]];
-  let likes = sheetConfig.tagIndexes["likes"] && row[sheetConfig.tagIndexes["likes"][0]].length > 0 ? row[sheetConfig.tagIndexes["likes"][0]].split(",") : [];
+
+  $: likes = sheetConfig.tagIndexes["likes"] && row[sheetConfig.tagIndexes["likes"][0]].length > 0 ? row[sheetConfig.tagIndexes["likes"][0]].split(",") : [];
+  
   $: types = !sheetConfig.tagIndexes["type"] ? [] : row[sheetConfig.tagIndexes["type"][0]].split(",").map((item) => {
     return item.trim();
   });
+  
   $: categories = !sheetConfig.tagIndexes["category"] ? [] : row[sheetConfig.tagIndexes["category"][0]].split(",").map((item) => {
     return item.trim();
   });
