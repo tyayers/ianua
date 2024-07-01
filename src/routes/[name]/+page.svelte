@@ -3,10 +3,10 @@
   import type { PageServerData } from "./$types";
   import RowCard from "$lib/components.row.card.svelte";
   import Header from "$lib/components.header.svelte";
-  import { DataConfig, UsageData } from "$lib/interfaces";
+  import { DataConfig, RowConfig, UsageData } from "$lib/interfaces";
   import { appService } from "$lib/app-service";
   import { goto } from "$app/navigation";
-    import { browser } from "$app/environment";
+  import { browser } from "$app/environment";
 
   export let data: PageServerData;
 
@@ -22,9 +22,12 @@
     }
   }
 
-  let rowData: {headers: string[], rows: string[][]} = {headers: [], rows: []};
-  let latestRows: string[][] = [];
-  let highestRatedRows: string[][] = [];
+  let rowData: {headers: string[], rows: RowConfig[]} = {headers: [], rows: []} = {
+    headers: [],
+    rows: []
+  };
+  let latestRows: RowConfig[] = [];
+  let highestRatedRows: RowConfig[] = [];
 
   let searchText: string = "";
   let types: { [key: string]: TagData } = {};
@@ -78,12 +81,11 @@
   });
 
   function setData(newData: {headers: string[], rows: string[][]}) {
-    rowData = newData;
-
+    rowData.headers = newData.headers;
     if (!sheetConfig) sheetConfig = appService.GetSheetConfig(data.dataName, rowData.headers);
 
     if (sheetConfig) {
-      appService.SetHeaderAction("+ Add " + sheetConfig?.name);
+      appService.SetHeaderAction("+ Add");
 
       nameIndex = sheetConfig.tagIndexes["name"][0];
       descriptionIndex = sheetConfig.tagIndexes["description"][0];
@@ -92,50 +94,44 @@
       dateIndex = sheetConfig.tagIndexes["date"][0];
       likesIndex = sheetConfig.tagIndexes["likes"][0];
 
-      for (let row of rowData.rows) {
+      newData.rows.forEach(row => {
 
-        let rowTypes: string[] = [];
-        if (row[typeIndex]) rowTypes = row[typeIndex].split(",").map(function(item: string) {
-          return item.trim();
-        });
+        if (sheetConfig) {
+          let newRow = appService.GetRowConfig(sheetConfig, newData.headers, row);
+          rowData.rows.push(newRow);
 
-        for (let type of rowTypes) {
-          if (! types[type]) {
-            types[type] = {
-              name: type,
-              char: getTypeLetter(type),
-              imageUrl: "/slides.svg",
-            };
+          for (let type of newRow.types) {
+            if (! types[type]) {
+              types[type] = {
+                name: type,
+                char: getTypeLetter(type),
+                imageUrl: "/slides.svg",
+              };
+            }
           }
-        }
 
-        let rowCategories: string[] = [];
-        if (row[categoryIndex]) rowCategories = row[categoryIndex].split(",").map(function(item: string) {
-          return item.trim();
-        });
-
-        for (let category of rowCategories) {
-          if (!sheetConfig.categoryOrder.includes(category)) {
-            const categoryIndex = categories.findIndex(item => item.name === category);
-            if (categoryIndex === -1) {
-            
-              categories.push({
+          for (let category of newRow.categories) {
+            if (!sheetConfig.categoryOrder.includes(category)) {
+              const categoryIndex = categories.findIndex(item => item.name === category);
+              if (categoryIndex === -1) {
+              
+                categories.push({
+                  name: category,
+                  char: getCategoryLetter(category),
+                  imageUrl: "/slides.svg",
+                });
+              }
+            }
+            else if (!categoriesOrdered[category]) {
+              categoriesOrdered[category] = {
                 name: category,
                 char: getCategoryLetter(category),
                 imageUrl: "/slides.svg",
-              });
+              };
             }
           }
-          else if (!categoriesOrdered[category]) {
-            categoriesOrdered[category] = {
-              name: category,
-              char: getCategoryLetter(category),
-              imageUrl: "/slides.svg",
-            };
-          }
         }
-
-      }
+      });
 
       // Sort categories alphabetically
       categories.sort(function(a, b) {
@@ -158,8 +154,8 @@
     if (dateIndex) {
       rowData.rows.sort((a, b) => {
         let result = 0;
-        let firstDate = new Date(a[dateIndex]);
-        let secondDate = new Date(b[dateIndex]);
+        let firstDate = new Date(a.date);
+        let secondDate = new Date(b.date);
         if (firstDate < secondDate) result = 1;
         if (firstDate > secondDate) result = -1;
 
@@ -172,13 +168,13 @@
     latestRows = [];
     for (let i = 0; i < rowData.rows.length; i++) {
       if (lastRead && sheetConfig?.tagIndexes["date"]) {
-        let rowDate = new Date(rowData.rows[i][sheetConfig.tagIndexes["date"][0]]);
+        let rowDate = new Date(rowData.rows[i].date);
         let lastReadDate = new Date(lastRead);
         if (rowDate > lastReadDate) {
-          newRows.push({date: rowData.rows[i][sheetConfig.tagIndexes["date"][0]], alert: rowData.rows[i][sheetConfig.tagIndexes["name"][0]], link: "/" + sheetConfig.name + "/" + rowData.rows[i][sheetConfig.tagIndexes["id"][0]]});
+          newRows.push({date: rowData.rows[i].date, alert: rowData.rows[i].name, link: "/" + sheetConfig.name + "/" + rowData.rows[i].id});
         }
       } else if (sheetConfig) {
-        newRows.push({date: rowData.rows[i][sheetConfig.tagIndexes["date"][0]], alert: rowData.rows[i][sheetConfig.tagIndexes["name"][0]], link: "/" + sheetConfig.name + "/" + rowData.rows[i][sheetConfig.tagIndexes["id"][0]]});
+        newRows.push({date: rowData.rows[i].date, alert: rowData.rows[i].name, link: "/" + sheetConfig.name + "/" + rowData.rows[i].id});
       }
 
       if (checkRow(rowData.rows[i])) {
@@ -196,10 +192,7 @@
     if (likesIndex) {
       rowData.rows.sort((a, b) => {
         let result = -1;
-        let aLikesLength = 0, bLikesLength = 0;
-        if (a[likesIndex].length > 0) aLikesLength = a[likesIndex].split(",").length;
-        if (b[likesIndex].length > 0) bLikesLength = b[likesIndex].split(",").length;
-
+        let aLikesLength = a.likes.length, bLikesLength = b.likes.length;
         result = bLikesLength - aLikesLength;
 
         return result;
@@ -217,24 +210,24 @@
 
     // Sort main list alphabetically
     rowData.rows.sort(function(a, b) {
-      var textA = a[nameIndex].toUpperCase();
-      var textB = b[nameIndex].toUpperCase();
+      var textA = a.name.toUpperCase();
+      var textB = b.name.toUpperCase();
       return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
     });
   }
 
-  function checkRow(row: string[]): boolean {
+  function checkRow(row: RowConfig): boolean {
     let result = true;
     if (
       (searchText &&
         !(
-          row[nameIndex].toLowerCase().includes(searchText.toLowerCase()) ||
-          row[descriptionIndex].toLowerCase().includes(searchText.toLowerCase())
+          row.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          row.description.toLowerCase().includes(searchText.toLowerCase())
         )) ||
       (selectedTypes.length > 0 &&
-        !selectedTypes.some((item) => row[typeIndex].includes(item))) ||
+        !selectedTypes.some((item) => row.types.includes(item))) ||
       (selectedProducts.length > 0 &&
-        !selectedProducts.some((item) => row[categoryIndex].includes(item)))
+        !selectedProducts.some((item) => row.categories.includes(item)))
     ) {
       result = false;
     }

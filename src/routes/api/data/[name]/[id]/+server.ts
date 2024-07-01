@@ -17,6 +17,7 @@ export const PUT: RequestHandler = async ({ request, url, params }) => {
 
   const updateRow: string[] = await request.json();
   const rangeStart = url.searchParams.get("rangeStart") ?? "";
+  const rowStart = 1;
   const name = params.name;
 
   if (!serverUtils.config) {
@@ -27,12 +28,13 @@ export const PUT: RequestHandler = async ({ request, url, params }) => {
   if (name)
     sheetConfig = serverUtils.GetSheetConfig(name);
   
-  const rowIndex = parseInt(updateRow[updateRow.length - 1]) + 2;
+  let rowIndex = parseInt(updateRow[updateRow.length - 1]) + rowStart;
   updateRow.splice(updateRow.length - 1, 1);
   const values: string[][] = [];
   values.push(updateRow);
 
   if (sheetConfig) {
+    if (sheetConfig.rowStart) rowIndex += sheetConfig.rowStart;
     try {
       await sheets.spreadsheets.values.update({
         spreadsheetId: sheetConfig.sheetId,

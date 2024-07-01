@@ -17,7 +17,7 @@ export const PATCH: RequestHandler = async({ params, url}) => {
   const name: string | undefined = params.name;
   const email: string = url.searchParams.get('email') ?? '';
   const row: string = url.searchParams.get('row') ?? '';
-  const sheetRow: number = parseInt(row) + 2;
+  let sheetRow: number = parseInt(row) + 1;
   const column: string = url.searchParams.get('column') ?? '';
   const columnLetter: string = String.fromCharCode((parseInt(column) + 1) +64)
   let result: string = email;
@@ -30,6 +30,9 @@ export const PATCH: RequestHandler = async({ params, url}) => {
   if (name) {
     sheetConfig = serverUtils.GetSheetConfig(name);
   }
+
+  if (sheetConfig && sheetConfig.rowStart)
+    sheetRow += sheetConfig.rowStart;
 
   if (sheetConfig) {
     const res = await sheets.spreadsheets.values.get({
@@ -69,7 +72,7 @@ export const DELETE: RequestHandler = async({ params, url}) => {
   const name: string | undefined = params.name;
   const email: string = url.searchParams.get('email') ?? '';
   const row: string = url.searchParams.get('row') ?? '';
-  const sheetRow = parseInt(row) + 2;
+  let sheetRow = parseInt(row) + 1;
   const column: string = url.searchParams.get('column') ?? '';
   const columnLetter: string = String.fromCharCode((parseInt(column) + 1) +64)
   let result: string = "";
@@ -83,6 +86,7 @@ export const DELETE: RequestHandler = async({ params, url}) => {
   }
 
   if (sheetConfig) {
+    if (sheetConfig.rowStart) sheetRow += sheetConfig.rowStart;
     const range: string = columnLetter + sheetRow + ':' + columnLetter + sheetRow;
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId: sheetConfig?.sheetId,

@@ -121,7 +121,7 @@
                     <div style="color: #afafaf; font-size: 14px; padding-left: 8px; padding-top: 8px;">
                       {alert.date}
                     </div>
-                    <div style="font-weight: normal; padding-top: 4px; padding-left: 8px; padding-bottom: 12px;">
+                    <div style="font-weight: normal; padding-top: 4px; padding-left: 8px; padding-bottom: 12px; color: #474747; font-size: 18px;">
                       {alert.alert}
                     </div>
                   </a>
@@ -222,7 +222,7 @@
     z-index: 3;
     right: 75px;
     top: 28px;
-    background: red;
+    background: #EA4335;
     border-radius: 24px;
     padding: 4px;
     font-size: 12px;

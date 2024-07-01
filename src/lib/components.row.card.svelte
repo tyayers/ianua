@@ -1,28 +1,26 @@
 <script lang="ts">
 	import { appService } from "./app-service";
-	import { DataConfig } from "./interfaces";
+	import { DataConfig, RowConfig } from "./interfaces";
 	import { PUBLIC_TEST_MODE } from '$env/static/public';
-  import { goto } from "$app/navigation";
-  import { assets } from "$app/paths";
 
-  export let row: string[];
+  export let row: RowConfig;
   export let sheetConfig: DataConfig;
 
-  $: id = row[sheetConfig.tagIndexes["id"][0]];
-  $: name = row[sheetConfig.tagIndexes["name"][0]];
-  $: description = row[sheetConfig.tagIndexes["description"][0]];
-  $: date = row[sheetConfig.tagIndexes["date"][0]];
-  $: audience = row[sheetConfig.tagIndexes["audience"][0]];
+  // $: id = row[sheetConfig.tagIndexes["id"][0]];
+  // $: name = row[sheetConfig.tagIndexes["name"][0]];
+  // $: description = row[sheetConfig.tagIndexes["description"][0]];
+  // $: date = row[sheetConfig.tagIndexes["date"][0]];
+  // $: audience = row[sheetConfig.tagIndexes["audience"][0]];
 
-  $: likes = sheetConfig.tagIndexes["likes"] && row[sheetConfig.tagIndexes["likes"][0]].length > 0 ? row[sheetConfig.tagIndexes["likes"][0]].split(",") : [];
+  // $: likes = sheetConfig.tagIndexes["likes"] && row[sheetConfig.tagIndexes["likes"][0]].length > 0 ? row[sheetConfig.tagIndexes["likes"][0]].split(",") : [];
   
-  $: types = !sheetConfig.tagIndexes["type"] ? [] : row[sheetConfig.tagIndexes["type"][0]].split(",").map((item) => {
-    return item.trim();
-  });
+  // $: types = !sheetConfig.tagIndexes["type"] ? [] : row[sheetConfig.tagIndexes["type"][0]].split(",").map((item) => {
+  //   return item.trim();
+  // });
   
-  $: categories = !sheetConfig.tagIndexes["category"] ? [] : row[sheetConfig.tagIndexes["category"][0]].split(",").map((item) => {
-    return item.trim();
-  });
+  // $: categories = !sheetConfig.tagIndexes["category"] ? [] : row[sheetConfig.tagIndexes["category"][0]].split(",").map((item) => {
+  //   return item.trim();
+  // });
   
   function getTypeColor(type: string) {
     let result = "background-color: " + sheetConfig.typeColors["default"];
@@ -34,23 +32,22 @@
   }
 
   function likeClick() {
-    // processing = true;
     let method: string = "PATCH";
-    if (appService.currentUser && likes.includes(appService.currentUser.email)) {
+    if (appService.currentUser && row.likes.includes(appService.currentUser.email)) {
       method = "DELETE";
-      let index = likes.indexOf(appService.currentUser.email);
-      if (index >= 0) likes.splice(index, 1);
+      let index = row.likes.indexOf(appService.currentUser.email);
+      if (index >= 0) row.likes.splice(index, 1);
     }
     else {
       if (appService.currentUser)
-        likes.push(appService.currentUser?.email);
+        row.likes.push(appService.currentUser?.email);
     }
 
-    likes = likes;
-    row[sheetConfig.tagIndexes["likes"][0]] = likes.join(",");
-    
+    row.row[sheetConfig.tagIndexes["likes"][0]] = row.likes.join(",");
+    row = row;
+
     if (PUBLIC_TEST_MODE != "true") {
-      let url = `/api/data/${sheetConfig.name}/${id}/likes?email=${appService.currentUser?.email}&row=${row[row.length - 1]}&column=${sheetConfig.tagIndexes["likes"]}`;
+      let url = `/api/data/${sheetConfig.name}/${row.id}/likes?email=${appService.currentUser?.email}&row=${row.row[row.row.length - 1]}&column=${sheetConfig.tagIndexes["likes"]}`;
       fetch(url, {
         method: method
       });
@@ -80,55 +77,51 @@
 
     let Difference_In_Time = today.getTime() - date.getTime();
 
-    // Calculating the no. of days between
-    // two dates
-    let Difference_In_Days =
-        Math.round
-            (Difference_In_Time / (1000 * 3600 * 24));
+    // Calculating the no. of days between two dates
+    let Difference_In_Days = Math.round(Difference_In_Time / (1000 * 3600 * 24));
 
-    //d.setDate(d.getDate() - Math.abs(n));
     return Difference_In_Days;
   }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<a href={"/" + sheetConfig.name + "/" + id} class="card_box">
+<a href={"/" + sheetConfig.name + "/" + row.id} class="card_box">
   <div style="display: flex; margin-bottom: 4px;">
 
-    {#each categories as category}
+    {#each row.categories as category}
       {#if sheetConfig.categoryIcons[category]}
         <img height="32px" alt="Product" title={category} src={sheetConfig.categoryIcons[category]} />
       {/if}
     {/each}
   </div>
-  {#if name}
-    {name}
+  {#if row.name}
+    {row.name}
   {:else}
-    {id}
+    {row.id}
   {/if}
   <div class="card_owner_box">
-    {daysAgo(new Date(date)) + " days ago"}
-    {#if audience}
+    {daysAgo(new Date(row.date)) + " days ago"}
+    {#if row.audience}
        - 
-      {audience}
+      {row.audience}
     {/if}
   </div>
   <div class="card_description_box">
-    {description}
+    {row.description}
   </div>
   <div class="card_footer" style="">
     <div class="tags_box">
-      {#each types as type}
+      {#each row.types as type}
       <span class="tag" style={getTypeColor(type)}>{type}</span>
       {/each}
     </div>
     <div class="likes_box" on:click|preventDefault={likeClick}>
-      <span class={getLikesClass(likes)}>
-        {likes.length}
+      <span class={getLikesClass(row.likes)}>
+        {row.likes.length}
       </span>
       <svg
-        class={getLikesIconClass(likes)}
+        class={getLikesIconClass(row.likes)}
         version="1.1"
         id="Layer_1"
         width="21px"

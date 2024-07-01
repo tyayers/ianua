@@ -116,15 +116,36 @@ export class AppService {
           result.tags[key] += " - " + result.row[index];
         else
           result.tags[key] = result.row[index];
-        if (key === "id") result.id = result.row[index];
-        if (key === "name") result.name = result.row[index];
-        if (key === "description") {
+
+        if (key === "id") 
+          result.id = result.row[index];
+        else if (key === "name") 
+          result.name = result.row[index];
+        else if (key === "audience") 
+          result.audience = result.row[index];
+        else if (key === "description") {
           if (result.description)
             result.description += " - " + result.row[index];
           else
             result.description = result.row[index];
         }
-        if (key === "date") result.date = result.row[index];
+        else if (key === "date") 
+          result.date = result.row[index];
+        else if (key === "likes" && result.row[index]) {
+          result.likes = result.row[index].split(",").map(item => {
+            return item.trim();
+          });
+        }
+        else if (key === "category" && result.row[index]) {
+          result.categories = result.row[index].split(",").map(item => {
+            return item.trim();
+          });
+        }
+        else if (key === "type" && result.row[index]) {
+          result.types = result.row[index].split(",").map(item => {
+            return item.trim();
+          });
+        }
       });
     }
 

@@ -37,7 +37,7 @@
   }
 
   function submit() {
-    fetch("/api/data/" + sheetConfig?.name + "/" + row[idIndex] + "?rangeStart=" + sheetConfig?.rangeStart, {
+    fetch("/api/data/" + sheetConfig?.name + "/" + row[idIndex] + "?rangeStart=" + sheetConfig?.rangeStart + "&rowStart=" + sheetConfig?.rowStart, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json"
@@ -67,10 +67,10 @@
   {#if sheetConfig && rowConfig}
     <RowEdit {sheetConfig} {rowConfig} />
 
-    <div class="form_controls" style="margin-top: 44px;">
+    <!-- <div class="form_controls" style="margin-top: 44px;">
       <button on:click={back} type="button" class="rounded_button_outlined">Cancel</button>
       <button type="button" on:click={submit} class="rounded_button_filled">Save</button>
-    </div>
+    </div> -->
   {/if}
 </div>
 

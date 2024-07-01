@@ -1,7 +1,6 @@
-// @ts-nocheck
 import type { PageLoad } from './$types';
 
-export const load = async ({ params }: Parameters<PageLoad>[0]) => {
+export const load: PageLoad = async ({ params }) => {
 
 	return {
     dataName: params.name

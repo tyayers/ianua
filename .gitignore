@@ -1,6 +1,7 @@
 config.yaml
 *.local*
 build
+.svelte-kit
 
 # Logs
 logs
