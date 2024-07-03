@@ -117,7 +117,7 @@
             {:else}
               {#each alerts as alert}
                 <div class="alert_box">
-                  <a href={alert.link} target="_blank">
+                  <a href={alert.link}>
                     <div style="color: #afafaf; font-size: 14px; padding-left: 8px; padding-top: 8px;">
                       {alert.date}
                     </div>

@@ -86,9 +86,12 @@ export class RowConfig {
   description: string = "";
   date: string = "";
   audience: string = "";
-  tags: {[key: string]: string} = {};
+  links: string[] = [];
   likes: string[] = [];
   categories: string[] = [];
   types: string[] = [];
+  levels: string[] = [];
+
+  tags: {[key: string]: string} = {};
   row: string[] = [];
 }

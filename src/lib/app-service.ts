@@ -131,6 +131,17 @@ export class AppService {
         }
         else if (key === "date") 
           result.date = result.row[index];
+        else if (key === "level") {
+          result.likes = result.row[index].split(",").map(item => {
+            return item.trim();
+          });
+        }
+        else if (key === "link") {
+          let tempLink = result.row[index];
+          result.links = tempLink.split(",").map(link => {
+            return link.trim();
+          });
+        }
         else if (key === "likes" && result.row[index]) {
           result.likes = result.row[index].split(",").map(item => {
             return item.trim();

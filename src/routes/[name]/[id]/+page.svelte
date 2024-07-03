@@ -15,10 +15,10 @@
 
   let links: {name: string, link: string, icon?: string}[] = [];
   let previewEmbedLink: string = "";
-  let likes: string[] = [];
-  let types: string[] = [];
-  let categories: string[] = [];
-  let levels: string[] = [];
+  // let likes: string[] = [];
+  // let types: string[] = [];
+  // let categories: string[] = [];
+  // let levels: string[] = [];
   let rowDate: Date;
   let idIndex: number = -1;
   let relatedData: {[key: string]: {prompt: string, sheetConfig: DataConfig, headers: string[], relatedKey: string, addOpen: boolean, newRow: RowConfig, rows: RowConfig[]}} = {};
@@ -36,51 +36,50 @@
           row = tempRow;
           rowConfig = appService.GetRowConfig(sheetConfig, result.headers, row);
         }
+         
+        if (rowConfig && rowConfig.links) {
+          for(let i=0; i<rowConfig.links.length; i++) {
+            let tempLink = rowConfig.links[i];
+            let tempName = rowConfig.links[i];
+            let tempIcon = "/slides.svg";
+            if (tempName.length > 40 && sheetConfig.tagIndexes["name"])
+              tempName = row[sheetConfig.tagIndexes["name"][0]];
 
-        if (sheetConfig && sheetConfig.tagIndexes["link"]) {
-          let link = row[sheetConfig?.tagIndexes["link"][0]];
-          let tempLinks = link.split(",").map(link => {
-            return link.trim();
-          });
-          
-          if (tempLinks) {
-            for(let i=0; i<tempLinks.length; i++) {
-              let tempLink = tempLinks[i];
-              let tempName = tempLinks[i];
-              let tempIcon = "/slides.svg";
-              if (tempName.length > 40 && sheetConfig.tagIndexes["name"])
-                tempName = row[sheetConfig.tagIndexes["name"][0]];
-
-              if (tempLink.startsWith("go/")) {
-                tempLink = "http://" + tempLink;
-              }
-              else if (tempLink.startsWith("https://github.com")) {
-                tempIcon = "/github.png";
-                tempName = "Source code assets"
-              }
-              else if (tempLink.startsWith("https://youtu.be")) {
-                tempIcon = "/youtube.webp";
-                tempName = "YouTube recording"
-                let pieces = tempLink.split("/");
-                previewEmbedLink = "https://www.youtube.com/embed/" + pieces[pieces.length - 1];
-              }
-              else if (tempLink.startsWith("https://www.googlecloudcommunity.com")) {
-                tempIcon = "/gcloud.png";
-                tempName = "Google Cloud Community post"
-              }
-              else if (tempLink.startsWith("https://docs.google.com")) {
-                if (tempLink.includes("/edit"))
-                  previewEmbedLink = tempLink.replace("/edit", "/embed");
-                else
-                  previewEmbedLink = tempLink + "/embed";
-              }
-
-              links.push({
-                name: tempName,
-                link: tempLink,
-                icon: tempIcon
-              })
+            if (tempLink.startsWith("go/")) {
+              tempLink = "http://" + tempLink;
             }
+            else if (tempLink.startsWith("https://github.com")) {
+              tempIcon = "/github.png";
+              tempName = "Source code assets"
+            }
+            else if (tempLink.startsWith("https://youtu.be")) {
+              tempIcon = "/youtube.webp";
+              tempName = "YouTube recording"
+              let pieces = tempLink.split("/");
+              previewEmbedLink = "https://www.youtube.com/embed/" + pieces[pieces.length - 1];
+            }
+            else if (tempLink.startsWith("https://www.googlecloudcommunity.com")) {
+              tempIcon = "/gcloud.png";
+              tempName = "Google Cloud Community post"
+            }
+            else if (tempLink.startsWith("https://docs.google.com")) {
+              if (tempLink.includes("/edit"))
+                previewEmbedLink = tempLink.replace("/edit", "/embed");
+              else
+                previewEmbedLink = tempLink + "/embed";
+
+              tempName += " Doc";
+            }
+            else if (tempLink.includes("nip.io") || tempLink.includes("run.app")) {
+              tempName += " Client App";
+              tempIcon = "/app.webp";
+            }
+
+            links.push({
+              name: tempName,
+              link: tempLink,
+              icon: tempIcon
+            })
           }
         }
 
@@ -89,22 +88,6 @@
         
         if (sheetConfig?.tagIndexes["name"])  
           document.title = row[sheetConfig.tagIndexes["name"][0]];
-
-        if (sheetConfig.tagIndexes["likes"] && row[sheetConfig.tagIndexes["likes"][0]]) {
-          likes = row[sheetConfig.tagIndexes["likes"][0]].split(",");
-        }
-
-        if (sheetConfig.tagIndexes["type"] && row[sheetConfig.tagIndexes["type"][0]]) {
-          types = row[sheetConfig.tagIndexes["type"][0]].split(",");
-        }
-
-        if (sheetConfig.tagIndexes["category"] && row[sheetConfig.tagIndexes["category"][0]]) {
-          categories = row[sheetConfig.tagIndexes["category"][0]].split(",");
-        }
-
-        if (sheetConfig.tagIndexes["level"] && row[sheetConfig.tagIndexes["level"][0]]) {
-          levels = row[sheetConfig.tagIndexes["level"][0]].split(",");
-        }
 
         // go through any related data fields
         sheetConfig.relatedFields.forEach((related) => {
@@ -157,20 +140,20 @@
 
   function likeClick() {
     let method: string = "PATCH";
-    if (appService.currentUser && likes.includes(appService.currentUser.email)) {
+    if (appService.currentUser && rowConfig && rowConfig.likes.includes(appService.currentUser.email)) {
       method = "DELETE";
-      let index = likes.indexOf(appService.currentUser.email);
-      if (index >= 0) likes.splice(index, 1);
-      likes = likes;
+      let index = rowConfig.likes.indexOf(appService.currentUser.email);
+      if (index >= 0) rowConfig.likes.splice(index, 1);
+      rowConfig.likes = rowConfig.likes;
     }
-    else {
+    else if (rowConfig) {
       if (appService.currentUser)
-        likes.push(appService.currentUser?.email);
-      likes = likes;
+        rowConfig.likes.push(appService.currentUser?.email);
+      rowConfig.likes = rowConfig.likes;
     }
 
     if (rowConfig && sheetConfig?.tagIndexes["likes"])
-      rowConfig.row[sheetConfig?.tagIndexes["likes"][0]] = likes.join(",");
+      rowConfig.row[sheetConfig?.tagIndexes["likes"][0]] = rowConfig.likes.join(",");
 
     if (PUBLIC_TEST_MODE !== "true" && sheetConfig) {
       let url = `/api/data/${sheetConfig.name}/${row[sheetConfig?.tagIndexes["id"][0]]}/likes?email=${appService.currentUser?.email}&row=${row[row.length - 1]}&column=${sheetConfig.tagIndexes["likes"]}`;
@@ -267,7 +250,7 @@
 <Header />
 
 <div class="page">
-  {#if sheetConfig && row.length > 0}
+  {#if sheetConfig && rowConfig && rowConfig.row.length > 0}
     <div class="back_box">
       <button style="float: left;" class="back_button" on:click={goBack}><svg data-icon-name="arrowBackIcon" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill-rule="evenodd" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"></path></svg></button>
       <a style="float: right; position: relative; top: 22px; left: -18px; color: #4285f4;" href={"/" + data.dataName + "/" + row[sheetConfig.tagIndexes["id"][0]] + "/edit"}>Edit</a>
@@ -303,16 +286,16 @@
         </div>
       {/if}
 
-      {#if sheetConfig.tagIndexes["likes"]}
+      {#if rowConfig}
         <!-- svelte-ignore missing-declaration -->
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-no-static-element-interactions -->
         <div class="likes_box" on:click|stopPropagation={likeClick}>
-          <span class={getLikesClass(likes)}>
-            {likes.length}
+          <span class={getLikesClass(rowConfig.likes)}>
+            {rowConfig.likes.length}
           </span>
           <svg
-            class={getLikesIconClass(likes)}
+            class={getLikesIconClass(rowConfig.likes)}
             version="1.1"
             id="Layer_1"
             width="21px"
@@ -343,7 +326,7 @@
     {/if}
 
     <div class="tags_box">
-      {#each types as type}
+      {#each rowConfig.types as type}
         <span class="tag" style={getTypeColor(type)}>{type}</span>
       {/each}
     </div>
@@ -369,19 +352,19 @@
       </div>
     {/if}
 
-    {#if categories.length > 0}
+    {#if rowConfig.categories.length > 0}
       <h3 style="margin-top: 24px; margin-bottom: 2px;">Products</h3>
       <ul>
-        {#each categories as category}
+        {#each rowConfig.categories as category}
           <li>{category}</li>
         {/each}
       </ul>
     {/if}
 
-    {#if levels.length > 0}
+    {#if rowConfig.levels.length > 0}
       <h3 style="margin-top: 24px; margin-bottom: 2px;">Level</h3>
       <ul>
-        {#each levels as level}
+        {#each rowConfig.levels as level}
           <li>{level}</li>
         {/each}
       </ul>
