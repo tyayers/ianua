@@ -2,7 +2,7 @@ import { json, type RequestHandler } from "@sveltejs/kit";
 import { GoogleAuth } from "google-auth-library";
 import { google } from "googleapis";
 import {DataConfig, UsageData} from "$lib/interfaces";
-import { serverUtils } from "$lib/server.utils";
+import { utils } from "$lib/utilities";
 
 const auth = new GoogleAuth({
 	scopes: ["https://www.googleapis.com/auth/spreadsheets",
@@ -13,18 +13,18 @@ const auth = new GoogleAuth({
 
 const sheets = google.sheets({version: 'v4', auth});
 
-export const POST: RequestHandler = async ({ request, params }) => {
+export const POST: RequestHandler = async ({ request, params, fetch }) => {
 
   const newUsage: UsageData = await request.json();
   const name: string | undefined = params.name;
   let sheetConfig: DataConfig | undefined = undefined;
 
-  if (!serverUtils.config) {
-    serverUtils.config = await (await fetch("/api/config")).json()
+  if (!utils.config) {
+    utils.config = await (await fetch("/api/config")).json()
   }
 
   if (name)
-    sheetConfig = serverUtils.GetSheetConfig(name);
+    sheetConfig = utils.GetSheetConfig(name);
 
   const values: string[][] = [];
   const newRow: string[] = [];

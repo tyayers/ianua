@@ -2,7 +2,7 @@ import { json, type RequestHandler } from "@sveltejs/kit";
 import { GoogleAuth } from "google-auth-library";
 import { google } from "googleapis";
 import { DataConfig } from "$lib/interfaces";
-import { serverUtils } from "$lib/server.utils";
+import { utils } from "$lib/utilities";
 import crypto from "crypto";
 
 const auth = new GoogleAuth({
@@ -19,12 +19,12 @@ export const GET: RequestHandler = async ( {params, fetch} ) => {
   const name: string | undefined = params.name;
   let sheetConfig: DataConfig | undefined = undefined;
 
-  if (!serverUtils.config) {
-    serverUtils.config = await (await fetch("/api/config")).json()
+  if (!utils.config) {
+    utils.config = await (await fetch("/api/config")).json()
   }
 
   if (name)
-    sheetConfig = serverUtils.GetSheetConfig(name);
+    sheetConfig = utils.GetSheetConfig(name);
   
   let rows: string[][] | null | undefined = [];
   let headers: string[] = [];
@@ -36,32 +36,48 @@ export const GET: RequestHandler = async ( {params, fetch} ) => {
     });
 
     const headersResult = res.data.values;
-    if (headersResult && headersResult.length > 0) headers = headersResult[0];
-    sheetConfig.rangeEnd = String.fromCharCode(headers.length+64);
-    headers.push("rowNumber");
-    const res2 = await sheets.spreadsheets.values.get({
-      spreadsheetId: sheetConfig.sheetId,
-      range: `${sheetConfig.rangeStart}${sheetConfig.rowStart + 1}:${sheetConfig.rangeEnd}`,
-    });
-    rows = res2.data.values;
+    if (headersResult && headersResult.length > 0) 
+      headers = headersResult[0];
 
-    if (!rows || rows.length === 0) {
-      console.log('No data found.');
-      rows = [];
-    } else {
-      rows.forEach((row, i) => {
-        let id: string = row[0].toString();
-        if (!id || id.length < 2) {
-          id = crypto.randomBytes(10).toString("hex");
-          row[0] = id;
-          updateRow(row, i, sheetConfig.rangeStart, sheetConfig.rangeEnd, sheetConfig.sheetId);
-        }
+    // Now that have headers, fetch sheet config again with tag info
+    if (name) sheetConfig = utils.GetSheetConfig(name, headers);
 
-        while(row.length < headers.length - 1)
-          row.push("");
-
-        row.push(i.toString());
+    if (sheetConfig) {
+      let idIndex = 0;
+      if (sheetConfig.tagIndexes["id"]) idIndex = sheetConfig.tagIndexes["id"][0];
+  
+      sheetConfig.rangeEnd = String.fromCharCode(headers.length+64);
+      headers.push("rowNumber");
+      const res2 = await sheets.spreadsheets.values.get({
+        spreadsheetId: sheetConfig.sheetId,
+        range: `${sheetConfig.rangeStart}${sheetConfig.rowStart + 1}:${sheetConfig.rangeEnd}`,
       });
+      rows = res2.data.values;
+
+      if (!rows || rows.length === 0) {
+        console.log('No data found.');
+        rows = [];
+      } else {
+        rows.forEach((row, i) => {
+          let id: string = row[idIndex].toString();
+          if (!id || id.length < 2) {
+            //id = crypto.randomBytes(10).toString("hex");
+            if (sheetConfig) {
+              id = row[sheetConfig.tagIndexes["name"][0]].toLowerCase().replaceAll(" ", "_");
+              if (id.length > 30) id = id.substring(0, 29);
+              id += (new Date()).getDay();
+
+              row[idIndex] = id;
+              updateRow(row, i, sheetConfig.rangeStart, sheetConfig.rangeEnd, sheetConfig.rowStart, sheetConfig.sheetId);
+            }
+          }
+
+          while(row.length < headers.length - 1)
+            row.push("");
+
+          row.push(i.toString());
+        });
+      }
     }
   }
 
@@ -76,12 +92,12 @@ export const POST: RequestHandler = async ({ request, params }) => {
   const name: string | undefined = params.name;
   let sheetConfig: DataConfig | undefined = undefined;
 
-  if (!serverUtils.config) {
-    serverUtils.config = await (await fetch("/api/config")).json()
+  if (!utils.config) {
+    utils.config = await (await fetch("/api/config")).json()
   }
 
   if (name)
-    sheetConfig = serverUtils.GetSheetConfig(name);
+    sheetConfig = utils.GetSheetConfig(name);
   
   const newRow: string[] = await request.json();
   newRow[0] = crypto.randomBytes(10).toString("hex");
@@ -107,8 +123,8 @@ export const POST: RequestHandler = async ({ request, params }) => {
   return json(newRow);
 };
 
-async function updateRow(row: string[], index: number, rangeStart: string, rangeEnd: string, sheetsId: string) {
-  const rangeToUpdate: string = rangeStart + (index + 2).toString() + ":" + rangeEnd + (index + 2).toString();
+async function updateRow(row: string[], index: number, rangeStart: string, rangeEnd: string, rowStart: number, sheetsId: string) {
+  const rangeToUpdate: string = rangeStart + (index + rowStart + 1).toString() + ":" + rangeEnd + (index + rowStart + 1).toString();
   console.log(`Preparing to update row: ${rangeToUpdate}`);
 
   await sheets.spreadsheets.values.update({

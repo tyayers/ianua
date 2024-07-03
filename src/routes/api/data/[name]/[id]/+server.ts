@@ -2,7 +2,7 @@ import { GoogleAuth } from "google-auth-library";
 import { google } from "googleapis";
 import { json, type RequestHandler } from "@sveltejs/kit";
 import type { DataConfig } from "$lib/interfaces";
-import { serverUtils } from "$lib/server.utils";
+import { utils } from "$lib/utilities";
 
 const auth = new GoogleAuth({
 	scopes: ["https://www.googleapis.com/auth/spreadsheets",
@@ -20,13 +20,13 @@ export const PUT: RequestHandler = async ({ request, url, params }) => {
   const rowStart = 1;
   const name = params.name;
 
-  if (!serverUtils.config) {
-    serverUtils.config = await (await fetch("/api/config")).json()
+  if (!utils.config) {
+    utils.config = await (await fetch("/api/config")).json()
   }
 
   let sheetConfig: DataConfig | undefined = undefined;
   if (name)
-    sheetConfig = serverUtils.GetSheetConfig(name);
+    sheetConfig = utils.GetSheetConfig(name);
   
   let rowIndex = parseInt(updateRow[updateRow.length - 1]) + rowStart;
   updateRow.splice(updateRow.length - 1, 1);

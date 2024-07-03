@@ -84,7 +84,7 @@
     rowData.headers = newData.headers;
     if (!sheetConfig) sheetConfig = appService.GetSheetConfig(data.dataName, rowData.headers);
 
-    if (sheetConfig) {
+    if (sheetConfig && sheetConfig.tagIndexes && sheetConfig.tagIndexes["name"]) {
       appService.SetHeaderAction("+ Add");
 
       nameIndex = sheetConfig.tagIndexes["name"][0];
@@ -143,6 +143,10 @@
       refreshData();
       types = types;
       categories = categories;
+    }
+    else {
+      console.error("Sheet data was not loaded correctly.");
+      console.log(sheetConfig);
     }
   }
 

@@ -1,6 +1,7 @@
 import { Config, DataConfig, RowConfig, User } from "./interfaces";
 import { browser } from '$app/environment';
 import { PUBLIC_TEST_MODE, PUBLIC_TEST_EMAIL } from '$env/static/public';
+import { Utilities, utils } from "./utilities";
 
 export class AppService {
   tempFirstName: string = "";
@@ -9,11 +10,11 @@ export class AppService {
 
   currentUser: User | undefined = undefined;
   currentUserLoaded: boolean = false;
-  config: Config | undefined = undefined;
+  // config: Config | undefined = undefined;
   reloadFlag: boolean = false;
-  googleAccessToken: string = "";
+  // googleAccessToken: string = "";
   data: {[key: string]: {headers: string[], rows: string[][]}} = {};
-  sheetConfig: {[key: string]: DataConfig | undefined} = {};
+  // sheetConfig: {[key: string]: DataConfig | undefined} = {};
   testMode: boolean = false;
   
   setHeaderAction: (buttonText: string) => void = (fds: string) => {
@@ -31,10 +32,12 @@ export class AppService {
       this.currentUser.status = "approved";
       document.dispatchEvent(new Event('userUpdated'));
 
+      // Load config
       fetch("/api/config").then((response) => {
         return response.json();
       }).then((result: Config) => {
-        this.config = result as Config;
+        // this.config = result as Config;
+        utils.config = result;
         document.dispatchEvent(new Event('configUpdated'));
       });
     }
@@ -51,37 +54,38 @@ export class AppService {
   }
 
   GetSheetConfig(name: string, headers: string[]): DataConfig | undefined {
-    if (this.sheetConfig[name])
-      return this.sheetConfig[name];
-    else {
-      const dataConfig = this.config?.data.find(sheet => sheet.name === name);
-      if (dataConfig) {
-        if (!dataConfig.tagIndexes) dataConfig.tagIndexes = {};
-        if (!dataConfig.fieldIndexes) dataConfig.fieldIndexes = {};
-        if (!dataConfig.relatedFields) dataConfig.relatedFields = [];
-        // index tags
-        headers.forEach((header, i) => {
-          const fieldConfig = dataConfig.fields.find(field => field.id === header);
-          if (fieldConfig && fieldConfig.tags) {
-            fieldConfig.tags.forEach((tag) => {
-              if (!dataConfig.tagIndexes[tag]) dataConfig.tagIndexes[tag] = [];
-              dataConfig.tagIndexes[tag].push(i);
-            });
-          }
-          dataConfig.fieldIndexes[header] = i;
-        });
+    return utils.GetSheetConfig(name, headers);
+    // if (this.sheetConfig[name])
+    //   return this.sheetConfig[name];
+    // else {
+    //   const dataConfig = this.config?.data.find(sheet => sheet.name === name);
+    //   if (dataConfig) {
+    //     if (!dataConfig.tagIndexes) dataConfig.tagIndexes = {};
+    //     if (!dataConfig.fieldIndexes) dataConfig.fieldIndexes = {};
+    //     if (!dataConfig.relatedFields) dataConfig.relatedFields = [];
+    //     // index tags
+    //     headers.forEach((header, i) => {
+    //       const fieldConfig = dataConfig.fields.find(field => field.id === header);
+    //       if (fieldConfig && fieldConfig.tags) {
+    //         fieldConfig.tags.forEach((tag) => {
+    //           if (!dataConfig.tagIndexes[tag]) dataConfig.tagIndexes[tag] = [];
+    //           dataConfig.tagIndexes[tag].push(i);
+    //         });
+    //       }
+    //       dataConfig.fieldIndexes[header] = i;
+    //     });
 
-        // check related
-        dataConfig.fields.forEach((field) => {
-          if (field.type === "related") {
-            dataConfig.relatedFields.push(field.relatedKey);
-          }
-        })
-        this.sheetConfig[name] = dataConfig;
-      }
+    //     // check related
+    //     dataConfig.fields.forEach((field) => {
+    //       if (field.type === "related") {
+    //         dataConfig.relatedFields.push(field.relatedKey);
+    //       }
+    //     })
+    //     this.sheetConfig[name] = dataConfig;
+    //   }
 
-      return dataConfig;
-    }
+    //   return dataConfig;
+    // }
   }
 
   GetRowConfig(sheetConfig: DataConfig, headers: string[], row: string[] | undefined = undefined): RowConfig {

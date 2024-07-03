@@ -2,7 +2,7 @@ import type { DataConfig } from "$lib/interfaces";
 import { json, type RequestHandler } from "@sveltejs/kit";
 import { GoogleAuth } from "google-auth-library";
 import { google } from "googleapis";
-import { serverUtils } from "$lib/server.utils";
+import { utils } from "$lib/utilities";
 
 const auth = new GoogleAuth({
 	scopes: ['https://www.googleapis.com/auth/spreadsheets',
@@ -23,12 +23,12 @@ export const PATCH: RequestHandler = async({ params, url}) => {
   let result: string = email;
 
   let sheetConfig: DataConfig | undefined = undefined;
-  if (!serverUtils.config) {
-    serverUtils.config = await (await fetch("/api/config")).json()
+  if (!utils.config) {
+    utils.config = await (await fetch("/api/config")).json()
   }
 
   if (name) {
-    sheetConfig = serverUtils.GetSheetConfig(name);
+    sheetConfig = utils.GetSheetConfig(name);
   }
 
   if (sheetConfig && sheetConfig.rowStart)
@@ -77,12 +77,12 @@ export const DELETE: RequestHandler = async({ params, url}) => {
   const columnLetter: string = String.fromCharCode((parseInt(column) + 1) +64)
   let result: string = "";
   let sheetConfig: DataConfig | undefined = undefined;
-  if (!serverUtils.config) {
-    serverUtils.config = await (await fetch("/api/config")).json()
+  if (!utils.config) {
+    utils.config = await (await fetch("/api/config")).json()
   }
 
   if (name) {
-    sheetConfig = serverUtils.GetSheetConfig(name);
+    sheetConfig = utils.GetSheetConfig(name);
   }
 
   if (sheetConfig) {
