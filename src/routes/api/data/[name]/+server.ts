@@ -100,12 +100,16 @@ export const POST: RequestHandler = async ({ request, params }) => {
     sheetConfig = utils.GetSheetConfig(name);
   
   const newRow: string[] = await request.json();
-  newRow[0] = crypto.randomBytes(10).toString("hex");
-
-  const values: string[][] = [];
-  values.push(newRow);
-
   if (sheetConfig) {
+    let id = newRow[sheetConfig.tagIndexes["name"][0]].toLowerCase().replaceAll(" ", "_");
+    if (id.length > 30) id = id.substring(0, 29);
+    id += (new Date()).getDay();
+
+    newRow[0] = id;
+
+    const values: string[][] = [];
+    values.push(newRow);
+
     try {
       await sheets.spreadsheets.values.append({
         spreadsheetId: sheetConfig.sheetId,

@@ -326,27 +326,29 @@
     <div class="banner_products_box">
       {#if sheetConfig && sheetConfig.categoryOrder}
         {#each sheetConfig.categoryOrder as category}
-          <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <!-- svelte-ignore a11y-no-static-element-interactions -->
-          <div
-            on:click|stopPropagation={() => clickProduct(categoriesOrdered[category].name)}
-            class="banner_product"
-          >
+          {#if categoriesOrdered[category]}
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <!-- svelte-ignore a11y-no-static-element-interactions -->
             <div
-              class={selectedProducts.includes(categoriesOrdered[category].name)
-                ? "banner_product_icon banner_product_icon_selected"
-                : "banner_product_icon"}
+              on:click|stopPropagation={() => clickProduct(categoriesOrdered[category].name)}
+              class="banner_product"
             >
-              <!-- svelte-ignore a11y-missing-attribute -->
-              <!-- <img width="24px" src={products[key].imageUrl} /> -->
-              <span style="color: #3367d6; font-size: 22px; font-weight: bold;"
-                >{categoriesOrdered[category].char}</span
+              <div
+                class={selectedProducts.includes(categoriesOrdered[category].name)
+                  ? "banner_product_icon banner_product_icon_selected"
+                  : "banner_product_icon"}
               >
+                <!-- svelte-ignore a11y-missing-attribute -->
+                <!-- <img width="24px" src={products[key].imageUrl} /> -->
+                <span style="color: #3367d6; font-size: 22px; font-weight: bold;"
+                  >{categoriesOrdered[category].char}</span
+                >
+              </div>
+              <div style="margin-top: 8px;">
+                {categoriesOrdered[category].name}
+              </div>
             </div>
-            <div style="margin-top: 8px;">
-              {categoriesOrdered[category].name}
-            </div>
-          </div>
+          {/if}
         {/each}
       {/if}
       {#each categories as category}
@@ -542,7 +544,7 @@
   }
 
   .types_box {
-    margin-top: 264px;
+    margin-top: 192px;
     /* margin-left: 58px; */
     max-width: 1000px;
     margin-left: auto;

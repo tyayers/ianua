@@ -10,11 +10,8 @@ export class AppService {
 
   currentUser: User | undefined = undefined;
   currentUserLoaded: boolean = false;
-  // config: Config | undefined = undefined;
   reloadFlag: boolean = false;
-  // googleAccessToken: string = "";
   data: {[key: string]: {headers: string[], rows: string[][]}} = {};
-  // sheetConfig: {[key: string]: DataConfig | undefined} = {};
   testMode: boolean = false;
   
   setHeaderAction: (buttonText: string) => void = (fds: string) => {
@@ -55,37 +52,6 @@ export class AppService {
 
   GetSheetConfig(name: string, headers: string[]): DataConfig | undefined {
     return utils.GetSheetConfig(name, headers);
-    // if (this.sheetConfig[name])
-    //   return this.sheetConfig[name];
-    // else {
-    //   const dataConfig = this.config?.data.find(sheet => sheet.name === name);
-    //   if (dataConfig) {
-    //     if (!dataConfig.tagIndexes) dataConfig.tagIndexes = {};
-    //     if (!dataConfig.fieldIndexes) dataConfig.fieldIndexes = {};
-    //     if (!dataConfig.relatedFields) dataConfig.relatedFields = [];
-    //     // index tags
-    //     headers.forEach((header, i) => {
-    //       const fieldConfig = dataConfig.fields.find(field => field.id === header);
-    //       if (fieldConfig && fieldConfig.tags) {
-    //         fieldConfig.tags.forEach((tag) => {
-    //           if (!dataConfig.tagIndexes[tag]) dataConfig.tagIndexes[tag] = [];
-    //           dataConfig.tagIndexes[tag].push(i);
-    //         });
-    //       }
-    //       dataConfig.fieldIndexes[header] = i;
-    //     });
-
-    //     // check related
-    //     dataConfig.fields.forEach((field) => {
-    //       if (field.type === "related") {
-    //         dataConfig.relatedFields.push(field.relatedKey);
-    //       }
-    //     })
-    //     this.sheetConfig[name] = dataConfig;
-    //   }
-
-    //   return dataConfig;
-    // }
   }
 
   GetRowConfig(sheetConfig: DataConfig, headers: string[], row: string[] | undefined = undefined): RowConfig {
@@ -135,16 +101,18 @@ export class AppService {
         }
         else if (key === "date") 
           result.date = result.row[index];
-        else if (key === "level") {
-          result.likes = result.row[index].split(",").map(item => {
+        else if (key === "level" && result.row[index]) {
+          result.levels = result.row[index].split(",").map(item => {
             return item.trim();
           });
         }
         else if (key === "link") {
           let tempLink = result.row[index];
-          result.links = tempLink.split(",").map(link => {
-            return link.trim();
-          });
+          if (tempLink && tempLink.length > 0) {
+            result.links = result.links.concat(tempLink.split(",").map(link => {
+              return link.trim();
+            }));
+          }
         }
         else if (key === "likes" && result.row[index]) {
           result.likes = result.row[index].split(",").map(item => {

@@ -58,7 +58,7 @@
     {#each data as option}
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <!-- svelte-ignore a11y-no-static-element-interactions -->
-      <div style="padding-top: 4px; padding-bottom: 4px; display: flex;" on:click|stopPropagation={()=>clickOption(option)}>
+      <div  class="option_line" style="padding-top: 4px; padding-bottom: 4px; display: flex;" on:click|stopPropagation={()=>clickOption(option)}>
         {#if multi && selectedData.includes(option)}
           <span>{option}</span><span class="option_check"><svg width="17px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M4 12.6111L8.92308 17.5L20 6.5" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg></span>
         {:else}
@@ -85,7 +85,6 @@
     top: 44px;
     margin-top: 4px;
     z-index: 2;
-    padding: 12px;
     background-color: white;
     min-width: 200px;
     width: 300px;
@@ -113,6 +112,14 @@
     border-top: 5px solid #aaa;
     border-right: 5px solid transparent;
     border-left: 5px solid transparent;
+  }
+
+  .option_line {
+    padding: 12px;
+  }
+
+  .option_line:hover {
+    background-color: #aaa;
   }
 
   .option_check {
