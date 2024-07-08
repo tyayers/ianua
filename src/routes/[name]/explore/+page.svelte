@@ -5,6 +5,7 @@
   import Header from "$lib/components.header.svelte";
   import { DataConfig, RowConfig, UsageData } from "$lib/interfaces";
   import { appService } from "$lib/app-service";
+  import FilterPanel from "$lib/components.filter.panel.svelte";
   import Select from '$lib/components.select.svelte';
   import { goto } from "$app/navigation";
   import { browser } from "$app/environment";
@@ -16,17 +17,22 @@
     headers: [],
     rows: []
   };
-  let types: string[] = [ "All" ];
-  let categories: string[] = [ "All" ];
+
+  let types: string[] = [];
+  let categories: string[] = [];
+  let topics: string[] = [];
 
   let searchText: string = "";
-  let selectedCategory: string = "All";
-  let selectedType: string = "All";
+  let selectedCategories: string[] = [];
+  let selectedTypes: string[] = [];
+  let selectedTopics: string[] = [];
 
   $: {
     let tempSearchText = searchText;
-    let tempSelectedCategory= selectedCategory;
-    let tempSelectedType = selectedType;
+    let tempSelectedCategories= selectedCategories;
+    let tempSelectedTypes = selectedTypes;
+    let tempSelectedTopics = selectedTopics;
+
     if (browser) refreshData();
   }
 
@@ -66,11 +72,17 @@
 
         newRow.categories.forEach(category => {
           if (!categories.includes(category)) categories.push(category);
-        })
+        });
+
+        newRow.topics.forEach(topic => {
+          if (!topics.includes(topic)) topics.push(topic);
+        });
       }
     });
 
     types = types;
+    categories = categories;
+    topics = topics;
   }
 
   function refreshData() {
@@ -85,8 +97,12 @@
           row.name.toLowerCase().includes(searchText.toLowerCase()) ||
           row.description.toLowerCase().includes(searchText.toLowerCase())
         )) ||
-      (selectedType && (selectedType != "All") && !row.types.includes(selectedType)) ||
-      (selectedCategory && (selectedCategory != "All") && !row.categories.includes(selectedCategory))
+      (selectedTypes.length > 0 &&
+        !selectedTypes.some((item) => row.types.includes(item))) ||
+      (selectedCategories.length > 0 &&
+        !selectedCategories.some((item) => row.categories.includes(item))) ||
+      (selectedTopics.length > 0 &&
+        !selectedTopics.some((item) => row.topics.includes(item)))
     ) {
       result = false;
     }
@@ -101,6 +117,8 @@
 </script>
 
 <Header actionButtonText="+ Add" actionEvent={actionAdd} showAlertButton={false} />
+
+<FilterPanel {categories} {selectedCategories} {topics} {selectedTopics} {types} {selectedTypes} />
 
 <div class="filter_bar">
   <div class="banner_search">
@@ -121,12 +139,6 @@
       bind:value={searchText}
       placeholder="Filter assets"
     />
-  </div>
-  <div class="select_dropdown" style="margin-left: 4px;">
-    <Select data={types} bind:selectedData={selectedType} />
-  </div>
-  <div class="select_dropdown" style="margin-left: 4px;">
-    <Select data={categories} bind:selectedData={selectedCategory} />
   </div>
 </div>
 
@@ -164,7 +176,7 @@
   }
 
   .banner_search {
-    width: 30%;
+    width: 90%;
     min-width: 180px;
     max-width: 800px;
     height: 44px;

@@ -10,7 +10,7 @@
 
   export let data: PageServerData;
 
-  class TagData {
+  class IconData {
     name: string;
     imageUrl: string;
     char: string;
@@ -30,12 +30,17 @@
   let highestRatedRows: RowConfig[] = [];
 
   let searchText: string = "";
-  let types: { [key: string]: TagData } = {};
-  let categories: TagData[] = [];
-  let categoriesOrdered: {[key: string]: TagData} = {};
+  let typeIcons: { [key: string]: IconData } = {};
+  let categoryIcons: IconData[] = [];
+  let categoriesOrdered: {[key: string]: IconData} = {};
+
+  let categories: string[] = [];
+  let topics: string[] = [];
+  let types: string[] = [];
 
   let selectedTypes: string[] = [];
-  let selectedProducts: string[] = [];
+  let selectedTopics: string[] = [];
+  let selectedCategories: string[] = [];
 
   let sheetConfig: DataConfig | undefined = undefined;
   let nameIndex: number = -1;
@@ -50,7 +55,7 @@
   $: {
     let tempSearchText = searchText;
     let tempSelectedTypes = selectedTypes;
-    let tempSelectedProducts = selectedProducts;
+    let tempSelectedProducts = selectedCategories;
     if (browser) refreshData();
   }
 
@@ -100,49 +105,63 @@
           let newRow = appService.GetRowConfig(sheetConfig, newData.headers, row);
           rowData.rows.push(newRow);
 
+          for (let topic of newRow.topics) {
+            if (!topics.includes(topic)) {
+              topics.push(topic);
+            }
+          }
+
           for (let type of newRow.types) {
-            if (! types[type]) {
-              types[type] = {
+            if (! typeIcons[type]) {
+              typeIcons[type] = {
                 name: type,
                 char: getTypeLetter(type),
                 imageUrl: "/slides.svg",
               };
+
+              types.push(type);
             }
           }
 
           for (let category of newRow.categories) {
-            if (!sheetConfig.categoryOrder.includes(category)) {
-              const categoryIndex = categories.findIndex(item => item.name === category);
-              if (categoryIndex === -1) {
-              
-                categories.push({
+            if (!categories.includes(category)) {
+              categories.push(category);
+              if (!sheetConfig.categoryOrder.includes(category)) {
+                const categoryIndex = categoryIcons.findIndex(item => item.name === category);
+                if (categoryIndex === -1) {
+                
+                  categoryIcons.push({
+                    name: category,
+                    char: getCategoryLetter(category),
+                    imageUrl: "/slides.svg",
+                  });
+                }
+              }
+              else if (!categoriesOrdered[category]) {
+                categoriesOrdered[category] = {
                   name: category,
                   char: getCategoryLetter(category),
                   imageUrl: "/slides.svg",
-                });
+                };
               }
-            }
-            else if (!categoriesOrdered[category]) {
-              categoriesOrdered[category] = {
-                name: category,
-                char: getCategoryLetter(category),
-                imageUrl: "/slides.svg",
-              };
             }
           }
         }
       });
 
       // Sort categories alphabetically
-      categories.sort(function(a, b) {
+      categoryIcons.sort(function(a, b) {
         var textA = a.name.toUpperCase();
         var textB = b.name.toUpperCase();
         return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
       });
 
       refreshData();
-      types = types;
+      typeIcons = typeIcons;
+      categoryIcons = categoryIcons;
       categories = categories;
+      topics = topics;
+      types = types;
     }
     else {
       console.error("Sheet data was not loaded correctly.");
@@ -230,8 +249,8 @@
         )) ||
       (selectedTypes.length > 0 &&
         !selectedTypes.some((item) => row.types.includes(item))) ||
-      (selectedProducts.length > 0 &&
-        !selectedProducts.some((item) => row.categories.includes(item)))
+      (selectedCategories.length > 0 &&
+        !selectedCategories.some((item) => row.categories.includes(item)))
     ) {
       result = false;
     }
@@ -256,15 +275,15 @@
   }
 
   function clickProduct(product: string) {
-    if (selectedProducts.includes(product)) {
+    if (selectedCategories.includes(product)) {
       // remove product
-      let index = selectedProducts.indexOf(product);
-      selectedProducts.splice(index, 1);
+      let index = selectedCategories.indexOf(product);
+      selectedCategories.splice(index, 1);
     } else {
       // add product
-      selectedProducts.push(product);
+      selectedCategories.push(product);
     }
-    selectedProducts = selectedProducts;
+    selectedCategories = selectedCategories;
   }
 
   function clickType(type: string) {
@@ -334,7 +353,7 @@
               class="banner_product"
             >
               <div
-                class={selectedProducts.includes(categoriesOrdered[category].name)
+                class={selectedCategories.includes(categoriesOrdered[category].name)
                   ? "banner_product_icon banner_product_icon_selected"
                   : "banner_product_icon"}
               >
@@ -351,7 +370,7 @@
           {/if}
         {/each}
       {/if}
-      {#each categories as category}
+      {#each categoryIcons as category}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-no-static-element-interactions -->
         <div
@@ -359,7 +378,7 @@
           class="banner_product"
         >
           <div
-            class={selectedProducts.includes(category.name)
+            class={selectedCategories.includes(category.name)
               ? "banner_product_icon banner_product_icon_selected"
               : "banner_product_icon"}
           >
@@ -378,7 +397,7 @@
   </div>
 
   <div class="types_box">
-    {#each Object.keys(types) as key}
+    {#each Object.keys(typeIcons) as key}
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <!-- svelte-ignore a11y-no-static-element-interactions -->
       <span
@@ -390,9 +409,9 @@
         {#if selectedTypes.includes(key)}
           <span class="types_chip_icon" style="position: relative; left: 2px;">✓</span>
         {:else}
-          <span class="types_chip_icon">{types[key].char}</span>
+          <span class="types_chip_icon">{typeIcons[key].char}</span>
         {/if}
-        <span style="float: right; margin-top: 2px;">{types[key].name}</span>
+        <span style="float: right; margin-top: 2px;">{typeIcons[key].name}</span>
       </span>
     {/each}
   </div>

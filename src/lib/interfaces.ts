@@ -90,6 +90,7 @@ export class RowConfig {
   likes: string[] = [];
   categories: string[] = [];
   types: string[] = [];
+  topics: string[] = [];
   levels: string[] = [];
 
   tags: {[key: string]: string} = {};

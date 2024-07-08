@@ -129,6 +129,11 @@ export class AppService {
             return item.trim();
           });
         }
+        else if (key === "topic" && result.row[index]) {
+          result.topics = result.row[index].split(",").map(item => {
+            return item.trim();
+          });
+        }
       });
     }
 
