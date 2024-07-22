@@ -3,11 +3,10 @@
   import type { PageData } from "./$types";
   import RowCard from "$lib/components.row.card.svelte";
   import Header from "$lib/components.header.svelte";
-  import { DataConfig, RowConfig, UsageData } from "$lib/interfaces";
+  import { DataConfig, RowConfig, UsageData, SortTypes } from "$lib/interfaces";
   import { appService } from "$lib/app-service";
   import FilterPanel from "$lib/components.filter.panel.svelte";
-  import Select from '$lib/components.select.svelte';
-  import { goto } from "$app/navigation";
+  import { goto, replaceState, pushState } from "$app/navigation";
   import { browser } from "$app/environment";
 
   export let data: PageData;
@@ -26,20 +25,20 @@
   let selectedCategories: string[] = [];
   let selectedTypes: string[] = [];
   let selectedTopics: string[] = [];
-
-  $: {
-    let tempSearchText = searchText;
-    let tempSelectedCategories= selectedCategories;
-    let tempSelectedTypes = selectedTypes;
-    let tempSelectedTopics = selectedTopics;
-
-    if (browser) refreshData();
-  }
-
+  let selectedSort: string = "";
+ 
   onMount(() => {
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let userSortType = urlParams.get("sort");
+    if (userSortType) 
+      selectedSort = userSortType;
+    else
+      selectedSort = SortTypes.Name_ascending;
+
     appService.LoadData(data.dataName).then((result) => {
       setData(result);
-      refreshData();
+      sort(selectedSort);
     });
 
     fetch("/api/data/" + data.dataName + "/usage", {
@@ -85,8 +84,88 @@
     topics = topics;
   }
 
-  function refreshData() {
+  function refresh() {
     tableData = tableData;
+
+    // const urlParams = new URLSearchParams(window.location.search);
+    // urlParams.set('order', 'date');
+    // window.location.search = urlParams;
+  }
+
+  function sort(sortDirection: string) {
+
+    console.log(sortDirection);
+    selectedSort = sortDirection;
+
+    if (browser && sortDirection) {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (sortDirection !== SortTypes.Name_ascending) {
+        urlParams.set('sort', sortDirection);
+        let newUrl = window.location.origin + window.location.pathname + "?" + urlParams.toString();
+        console.log(newUrl);
+        console.log(window.location);
+        if (newUrl != window.location.href)
+          replaceState(newUrl, {});
+      }
+      else if (sortDirection === SortTypes.Name_ascending) {
+        urlParams.delete('sort');
+        if (urlParams.size > 0) {
+          let newUrl = window.location.origin + window.location.pathname + "?" + urlParams.toString();
+          if (newUrl != window.location.href)
+            replaceState(newUrl, {});
+        }
+        else {
+          let newUrl = window.location.origin + window.location.pathname;
+          if (newUrl != window.location.href)
+            replaceState(newUrl, {});
+        }
+      }
+    }
+
+    if (sortDirection == SortTypes.Name_ascending) {
+      tableData.rows.sort(function(a, b) {
+        var textA = a.name.toUpperCase();
+        var textB = b.name.toUpperCase();
+        return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+      });
+    }
+    else if (sortDirection == SortTypes.Name_descending) {
+      tableData.rows.sort(function(a, b) {
+        var textA = b.name.toUpperCase();
+        var textB = a.name.toUpperCase();
+        return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+      });
+    }
+    else if (sortDirection == SortTypes.Last_updated_ascending) {
+      tableData.rows.sort(function(a, b) {
+        let dateA = new Date(b.date);
+        let dateB = new Date(a.date);
+        return dateB.getTime() - dateA.getTime();
+      });
+    }
+    else if (sortDirection == SortTypes.Last_updated_descending) {
+      tableData.rows.sort(function(a, b) {
+        let dateA = new Date(a.date);
+        let dateB = new Date(b.date);
+        return dateB.getTime() - dateA.getTime();
+      });
+    }
+    else if (sortDirection == SortTypes.Likes_ascending) {
+      tableData.rows.sort(function(a, b) {
+        let likesA = a.likes.length;
+        let likesB = b.likes.length;
+        return likesA - likesB;
+      });
+    }
+    else if (sortDirection == SortTypes.Likes_descending) {
+      tableData.rows.sort(function(a, b) {
+        let likesA = a.likes.length;
+        let likesB = b.likes.length;
+        return likesB - likesA;
+      });
+    }
+
+    refresh();
   }
 
   function checkRow(row: RowConfig): boolean {
@@ -118,7 +197,7 @@
 
 <Header actionButtonText="+ Add" actionEvent={actionAdd} showAlertButton={false} />
 
-<FilterPanel {categories} {selectedCategories} {topics} {selectedTopics} {types} {selectedTypes} />
+<FilterPanel {selectedSort} {categories} {selectedCategories} {topics} {selectedTopics} {types} {selectedTypes} {refresh} {sort}/>
 
 <div class="filter_bar">
   <div class="banner_search">

@@ -96,3 +96,12 @@ export class RowConfig {
   tags: {[key: string]: string} = {};
   row: string[] = [];
 }
+
+export enum SortTypes {
+  Name_ascending = "Name ascending",
+  Name_descending = "Name descending",
+  Last_updated_descending = "Last updated descending",
+  Last_updated_ascending = "Last updated ascending",
+  Likes_descending = "Likes descending",
+  Likes_ascending = "Likes ascending"
+}
