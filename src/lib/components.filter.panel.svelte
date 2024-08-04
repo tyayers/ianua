@@ -79,41 +79,40 @@
   }
 </script>
 
-<div class="filter_panel">
-  <h4>Sort</h4>
-  <div class="form_list">
-    <div class="select_dropdown">
-      <Select data={Object.values(SortTypes)} bind:selectedData={selectedSort} />
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<div class="filter_panel" on:click|stopPropagation={() => {}}>
+  {#if categories.length > 0}
+    <h4>Sort</h4>
+    <div class="form_list">
+      <div class="select_dropdown">
+        <Select data={Object.values(SortTypes)} bind:selectedData={selectedSort} />
+      </div>
     </div>
-  </div>
 
-  <h4>Categories</h4>
-  {#each categories as category}
-    <div class="product_filter_checkbox">
-      <input type="checkbox" id={category} name={category} on:change={onCategoryChange} /><label for={category}>{category}</label>
-    </div>
-  {/each}
+    <h4>Categories</h4>
+    {#each categories as category}
+      <div class="product_filter_checkbox">
+        <input type="checkbox" id={category} name={category} on:change={onCategoryChange} /><label for={category}>{category}</label>
+      </div>
+    {/each}
 
-  <h4>Topics</h4>
-  {#each topics as topic}
-    <div class="product_filter_checkbox">
-      <input type="checkbox" id={topic} name={topic} on:change={onTopicChange} /><label for={topic}>{topic}</label>
-    </div>
-  {/each}
+    <h4>Topics</h4>
+    {#each topics as topic}
+      <div class="product_filter_checkbox">
+        <input type="checkbox" id={topic} name={topic} on:change={onTopicChange} /><label for={topic}>{topic}</label>
+      </div>
+    {/each}
 
-  <h4>Types</h4>
-  {#each types as type}
-    <div class="product_filter_checkbox">
-      <input type="checkbox" id={type} name={type} on:change={onTypeChange} /><label for={type}>{type}</label>
-    </div>
-  {/each}
+    <h4>Types</h4>
+    {#each types as type}
+      <div class="product_filter_checkbox">
+        <input type="checkbox" id={type} name={type} on:change={onTypeChange} /><label for={type}>{type}</label>
+      </div>
+    {/each}
+  {/if}
 </div>
 
 <style>
-  .filter_panel {
-    position: fixed;
-    left: 24px;
-    top: 60px;
-    display: inline;
-  }
+
 </style>

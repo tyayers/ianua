@@ -14,6 +14,9 @@
   export let showAlertButton: boolean = false;
   export let alerts: {date: string, alert: string, link: string}[] = [];
   export let alertsClick: () => void = () => {};
+
+  export let showMenuButton: boolean = false;
+  export let menuClick: () => void = () => {};
   
   let currentUser: User | undefined = appService.currentUser;
   let menuVisible: boolean = false;
@@ -52,18 +55,22 @@
     goto("/");
   }
 
-  function profileClick() {
+  function onProfileClick() {
     menuVisible = !menuVisible;
     alertsVisible = false;
   }
 
-  function alertClick() {
+  function onAlertsClick() {
     alertsVisible = !alertsVisible;
     menuVisible = false;
     badgeVisible = false;
     if (alertsClick) {
       alertsClick();
     }
+  }
+
+  function onMenuClick() {
+    if (menuClick) menuClick();
   }
 
   function triggerAction() {
@@ -74,10 +81,17 @@
 
 <div class="header">
   <span class="header_left_panel1">
-    <!-- <a href="/home">
-      <img class="leader_left_panel1_logo" src="/loop.svg" alt="Data Marketplace" />
-      <span class="header_left_panel1_name">{appService.siteName}</span>
-    </a> -->
+
+    {#if showMenuButton}
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <svg class="menu_button" on:click|stopPropagation={menuClick} style="position: relative; top: -2px; left: -4px;" width="28px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M4 6H20M4 12H20M4 18H20" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+
+      <a href="/">
+        <img class="leader_left_panel1_logo" src="/apigee-logo-colorful.png" alt="Data Marketplace" />
+        <span class="header_left_panel1_name">{appService.siteName}</span>
+      </a>
+    {/if}
 
   </span>
 
@@ -90,7 +104,7 @@
       {/if}
 
       {#if showAlertButton}
-        <button style="position: relative; top: -4px; left: -10px;" class="back_button" on:click|stopPropagation={alertClick}>
+        <button style="position: relative; top: -4px; left: -10px;" class="back_button" on:click|stopPropagation={onAlertsClick}>
           <svg width="100%" height="100%" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false"><path fill="#333" d="M18 17v-6c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v6H4v2h16v-2h-2zm-2 0H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6zm-4 5c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2z"></path></svg>
         </button>
         {#if alerts.length > 0 && badgeVisible}
@@ -99,8 +113,8 @@
       {/if}
 
       <button
-        on:click|stopPropagation={profileClick}
-        on:keydown|stopPropagation={profileClick}
+        on:click|stopPropagation={onProfileClick}
+        on:keydown|stopPropagation={onProfileClick}
         class="profile_button"
       >
         <img class="profile_button_image" src={currentUser.photoUrl} onerror="this.src='/avatar.png';" alt="The user's profile." />
@@ -215,6 +229,12 @@
   .header_right_panel1 {
     margin-top: 7px;
     margin-right: 24px;
+  }
+
+  @media (min-width: 1470px) {
+    .menu_button {
+      display: none;
+    }
   }
 
   .alert_badge {

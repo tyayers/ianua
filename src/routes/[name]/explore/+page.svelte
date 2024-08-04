@@ -27,6 +27,8 @@
   let selectedTopics: string[] = [];
   let selectedSort: string = "";
  
+  let filterPanel: HTMLElement;
+
   onMount(() => {
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -52,6 +54,21 @@
     }).then((response) => {
       if (response.status != 200) {
         console.error("Could not update usage data - " + response.statusText);
+      }
+    });
+
+    window.onresize = () => {
+      if (window.innerWidth <= 1470) {
+        filterPanel.style.display = "none";
+      }
+      else {
+        filterPanel.style.display = "block";
+      }
+    };
+
+    document.addEventListener("cancelEvent", () => {
+      if (window.innerWidth <= 1470) {
+        filterPanel.style.display = "none";
       }
     });
   });
@@ -193,11 +210,21 @@
     if (sheetConfig)
       goto("/" + sheetConfig.name + "/new");
   }
+
+  function menuClick() {
+    if (filterPanel && (!filterPanel.style.display || filterPanel.style.display === "none")) {
+      filterPanel.style.display = "block";
+    } else if (filterPanel) {
+      filterPanel.style.display = "none";
+    }
+  }
 </script>
 
-<Header actionButtonText="+ Add" actionEvent={actionAdd} showAlertButton={false} />
+<Header showMenuButton={true} {menuClick} actionButtonText="+ Add" actionEvent={actionAdd} showAlertButton={false} />
 
-<FilterPanel {selectedSort} {categories} {selectedCategories} {topics} {selectedTopics} {types} {selectedTypes} {refresh} {sort}/>
+<div bind:this={filterPanel} id="filter_panel">
+  <FilterPanel {selectedSort} {categories} {selectedCategories} {topics} {selectedTopics} {types} {selectedTypes} {refresh} {sort}/>
+</div>
 
 <div class="filter_bar">
   <div class="banner_search">
@@ -242,6 +269,28 @@
 {/if}
 
 <style>
+
+  #filter_panel {
+    display: block;
+    position: fixed;
+    background-color: white;
+    z-index: 100;
+    left: 24px;
+    top: 60px;
+    padding-right: 22px;
+    padding-left: 22px;
+    padding-bottom: 22px;
+    border-radius: 24px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 10px 0px;
+    border: 1px solid rgb(242, 242, 242);
+  }
+
+  @media (max-width: 1470px) {
+    #filter_panel {
+      display: none;
+    }
+  }
+
   .filter_bar {
     position: absolute;
     width: 100%;

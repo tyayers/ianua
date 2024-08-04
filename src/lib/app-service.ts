@@ -1,12 +1,12 @@
 import { Config, DataConfig, RowConfig, User } from "./interfaces";
 import { browser } from '$app/environment';
-import { PUBLIC_TEST_MODE, PUBLIC_TEST_EMAIL } from '$env/static/public';
+import { PUBLIC_TEST_MODE, PUBLIC_TEST_EMAIL, PUBLIC_SITE_NAME } from '$env/static/public';
 import { Utilities, utils } from "./utilities";
 
 export class AppService {
   tempFirstName: string = "";
   tempLastName: string = "";
-  siteName: string = "Apigee Assets";
+  siteName: string = PUBLIC_SITE_NAME;
 
   currentUser: User | undefined = undefined;
   currentUserLoaded: boolean = false;
@@ -19,7 +19,7 @@ export class AppService {
   };
 
   constructor() {
-    if (!this.siteName) this.siteName = "Data Marketplace";
+    if (!this.siteName) this.siteName = "Marketplace";
 
     if (browser) {
       document.title = this.siteName;
