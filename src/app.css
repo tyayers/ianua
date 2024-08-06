@@ -1,3 +1,5 @@
+/* @media screen and (max-width: 570px){ html,body {min-width:570px} } */
+
 body {
   margin: 0px;
   font-family: sans-serif;

@@ -514,12 +514,21 @@
     background-color: #fafafa;
   }
 
+  @media (max-width: 1280px) {
+    .banner_search_box {
+      width: 240px;
+      position: absolute;
+      left: 4px;
+    }
+  }
+
   .banner_search_icon {
+    width: 20px;
     margin-left: 9px;
   }
 
   .banner_search_input {
-    width: 90%;
+    width: calc(86% - 20px);
     margin-top: 4px;
     border-width: 0px;
     font-size: 14px;

@@ -6,7 +6,7 @@
   import { DataConfig, RowConfig, UsageData, SortTypes } from "$lib/interfaces";
   import { appService } from "$lib/app-service";
   import FilterPanel from "$lib/components.filter.panel.svelte";
-  import { goto, replaceState, pushState } from "$app/navigation";
+  import { goto, replaceState, pushState, invalidate, invalidateAll } from "$app/navigation";
   import { browser } from "$app/environment";
 
   export let data: PageData;
@@ -26,8 +26,12 @@
   let selectedTypes: string[] = [];
   let selectedTopics: string[] = [];
   let selectedSort: string = "";
- 
   let filterPanel: HTMLElement;
+
+  $: {
+    let tempSearchText = searchText;
+    refresh();
+  }
 
   onMount(() => {
 
@@ -120,10 +124,12 @@
   }
 
   function sort(sortDirection: string) {
+    if (!sortDirection)
+      sortDirection = SortTypes.Name_ascending;
 
     selectedSort = sortDirection;
 
-    if (browser && sortDirection) {
+    if (browser) {
       const urlParams = new URLSearchParams(window.location.search);
       if (sortDirection !== SortTypes.Name_ascending) {
         urlParams.set('sort', sortDirection);
@@ -192,6 +198,14 @@
     refresh();
   }
 
+  function reset() {
+    setUrlParam("sort", "");
+    setUrlParam("categories", "");
+    setUrlParam("topics", "");
+    setUrlParam("types", "");
+    location.reload();
+  }
+
   function setUrlParam(name: string, value: string) {
     if (browser) {
       const urlParams = new URLSearchParams(window.location.search);
@@ -256,9 +270,11 @@
 
 <Header showMenuButton={true} {menuClick} actionButtonText="+ Add" actionEvent={actionAdd} showAlertButton={false} />
 
-<div bind:this={filterPanel} id="filter_panel">
-  <FilterPanel {selectedSort} {categories} {selectedCategories} {topics} {selectedTopics} {types} {selectedTypes} {refresh} {sort}/>
-</div>
+{#if tableData.rows.length > 0}
+  <div bind:this={filterPanel} id="filter_panel">
+    <FilterPanel {selectedSort} {categories} {selectedCategories} {topics} {selectedTopics} {types} {selectedTypes} {refresh} {sort} {reset}/>
+  </div>
+{/if}
 
 <div class="filter_bar">
   <div class="banner_search">
@@ -328,21 +344,27 @@
   }
 
   .filter_bar {
-    position: absolute;
-    width: 100%;
     height: 64px;
-    display: flex;
-    justify-content: center;
     top: 0px;
     z-index: 3;
     position: sticky;
     top: 4px;
+    margin-left: auto;
+    margin-right: auto;
+    min-width: 180px;
+    max-width: 800px;
+  }
+  
+  @media (max-width: 1186px) {
+    .filter_bar {
+      width: 210px;
+      position: absolute;
+      left: 84px;
+    }
   }
 
   .banner_search {
-    width: 90%;
-    min-width: 180px;
-    max-width: 800px;
+    margin-top: 4px;
     height: 44px;
     border-radius: 5px;
     background-color: #fafafa;
@@ -350,10 +372,11 @@
 
   .banner_search_icon {
     margin-left: 9px;
+    width: 20px;
   }
 
   .banner_search_input {
-    width: 87%;
+    width: calc(86% - 20px);
     margin-top: 4px;
     border-width: 0px;
     font-size: 14px;

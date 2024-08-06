@@ -12,6 +12,9 @@
   export let selectedTypes: string[] = [];
   export let refresh: () => void;
   export let sort: (direction: string) => void;
+  export let reset: () => void;
+
+  let initialSelectedSort = selectedSort;
 
   // reactive sort listener
   $: {
@@ -43,11 +46,18 @@
     if (collection.includes(value)) result = true;
     return result;
   }
+
+  function resetFilter() {
+    if (reset) reset();
+  }
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div on:click|stopPropagation={() => {}}>
+
+  <button class="rounded_button_outlined" on:click={resetFilter} style="margin-top: 14px; margin-bottom: 8px; padding-top: 8px; padding-bottom: 8px;">Reset filter</button>
+
   {#if categories.length > 0}
     <h4>Sort</h4>
     <div class="form_list">
