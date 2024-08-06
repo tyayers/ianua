@@ -10,8 +10,15 @@
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<div on:click={sendCancel} on:keyup={sendCancel}>
+<div id="layout_box" on:click={sendCancel} on:keyup={sendCancel}>
 
   <slot />
 
 </div>
+
+<style>
+	#layout_box {
+		height: 100vh;
+		overflow-y: auto;
+	}
+</style>

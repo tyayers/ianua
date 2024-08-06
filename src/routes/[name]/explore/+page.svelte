@@ -37,6 +37,16 @@
       selectedSort = userSortType;
     else
       selectedSort = SortTypes.Name_ascending;
+    
+    let userCategories = urlParams.get("categories");
+    if (userCategories)
+      selectedCategories = userCategories.split(",");
+    let userTopics = urlParams.get("topics");
+    if (userTopics)
+      selectedTopics = userTopics.split(",");
+    let userTypes = urlParams.get("types");
+    if (userTypes)
+      selectedTypes = userTypes.split(",");
 
     appService.LoadData(data.dataName).then((result) => {
       setData(result);
@@ -104,14 +114,13 @@
   function refresh() {
     tableData = tableData;
 
-    // const urlParams = new URLSearchParams(window.location.search);
-    // urlParams.set('order', 'date');
-    // window.location.search = urlParams;
+    setUrlParam("categories", selectedCategories.join(","));
+    setUrlParam("topics", selectedTopics.join(","));
+    setUrlParam("types", selectedTypes.join(","));
   }
 
   function sort(sortDirection: string) {
 
-    console.log(sortDirection);
     selectedSort = sortDirection;
 
     if (browser && sortDirection) {
@@ -119,8 +128,6 @@
       if (sortDirection !== SortTypes.Name_ascending) {
         urlParams.set('sort', sortDirection);
         let newUrl = window.location.origin + window.location.pathname + "?" + urlParams.toString();
-        console.log(newUrl);
-        console.log(window.location);
         if (newUrl != window.location.href)
           replaceState(newUrl, {});
       }
@@ -183,6 +190,33 @@
     }
 
     refresh();
+  }
+
+  function setUrlParam(name: string, value: string) {
+    if (browser) {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (value) {
+        urlParams.set(name, value);
+        let newUrl = window.location.origin + window.location.pathname + "?" + urlParams.toString();
+        console.log(newUrl);
+        console.log(window.location);
+        if (newUrl != window.location.href)
+          replaceState(newUrl, {});
+      }
+      else if (! value) {
+        urlParams.delete(name);
+        if (urlParams.size > 0) {
+          let newUrl = window.location.origin + window.location.pathname + "?" + urlParams.toString();
+          if (newUrl != window.location.href)
+            replaceState(newUrl, {});
+        }
+        else {
+          let newUrl = window.location.origin + window.location.pathname;
+          if (newUrl != window.location.href)
+            replaceState(newUrl, {});
+        }
+      }
+    }
   }
 
   function checkRow(row: RowConfig): boolean {
@@ -277,6 +311,8 @@
     z-index: 100;
     left: 24px;
     top: 60px;
+    max-height: calc(100vh - 95px);
+    overflow-y: auto;
     padding-right: 22px;
     padding-left: 22px;
     padding-bottom: 22px;

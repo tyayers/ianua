@@ -324,26 +324,29 @@
     Assets
   </div>
 
-  <div class="banner_search">
-    <svg
-      class="banner_search_icon"
-      width="4%"
-      height="100%"
-      viewBox="0 0 18 18"
-      preserveAspectRatio="xMidYMid meet"
-      focusable="false"
-      ><path
-        d="M11.18 9.747l4.502 4.503-1.414 1.414-4.5-4.5a5 5 0 1 1 1.41-1.418zM7 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"
-        fill-rule="evenodd"
-      ></path></svg
-    >
-    <input
-      class="banner_search_input"
-      bind:value={searchText}
-      placeholder="Filter assets"
-    />
-    <div class="banner_products_box">
-      {#if sheetConfig && sheetConfig.categoryOrder}
+  {#if sheetConfig && sheetConfig.categoryOrder}
+    <div class="banner_search_box">
+      <svg
+        class="banner_search_icon"
+        width="4%"
+        height="100%"
+        viewBox="0 0 18 18"
+        preserveAspectRatio="xMidYMid meet"
+        focusable="false"
+        ><path
+          d="M11.18 9.747l4.502 4.503-1.414 1.414-4.5-4.5a5 5 0 1 1 1.41-1.418zM7 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"
+          fill-rule="evenodd"
+        ></path></svg
+      >
+      <input
+        class="banner_search_input"
+        bind:value={searchText}
+        placeholder="Filter assets"
+      />
+    </div>
+
+    <div class="banner_categories">
+      <div class="banner_products_box">
         {#each sheetConfig.categoryOrder as category}
           {#if categoriesOrdered[category]}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -369,60 +372,58 @@
             </div>
           {/if}
         {/each}
-      {/if}
-      {#each categoryIcons as category}
+        {#each categoryIcons as category}
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <div
+            on:click|stopPropagation={() => clickProduct(category.name)}
+            class="banner_product"
+          >
+            <div
+              class={selectedCategories.includes(category.name)
+                ? "banner_product_icon banner_product_icon_selected"
+                : "banner_product_icon"}
+            >
+              <!-- svelte-ignore a11y-missing-attribute -->
+              <!-- <img width="24px" src={products[key].imageUrl} /> -->
+              <span style="color: #3367d6; font-size: 22px; font-weight: bold;"
+                >{category.char}</span
+              >
+            </div>
+            <div style="margin-top: 8px;">
+              {category.name}
+            </div>
+          </div>
+        {/each}
+      </div>
+    </div>
+
+    <div class="types_box">
+      {#each Object.keys(typeIcons) as key}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <div
-          on:click|stopPropagation={() => clickProduct(category.name)}
-          class="banner_product"
+        <span
+          on:click|stopPropagation={() => clickType(key)}
+          class={selectedTypes.includes(key)
+            ? "type_chip type_chip_selected"
+            : "type_chip"}
         >
-          <div
-            class={selectedCategories.includes(category.name)
-              ? "banner_product_icon banner_product_icon_selected"
-              : "banner_product_icon"}
-          >
-            <!-- svelte-ignore a11y-missing-attribute -->
-            <!-- <img width="24px" src={products[key].imageUrl} /> -->
-            <span style="color: #3367d6; font-size: 22px; font-weight: bold;"
-              >{category.char}</span
-            >
-          </div>
-          <div style="margin-top: 8px;">
-            {category.name}
-          </div>
-        </div>
+          {#if selectedTypes.includes(key)}
+            <span class="types_chip_icon" style="position: relative; left: 2px;">✓</span>
+          {:else}
+            <span class="types_chip_icon">{typeIcons[key].char}</span>
+          {/if}
+          <span style="float: right; margin-top: 2px;">{typeIcons[key].name}</span>
+        </span>
       {/each}
     </div>
-  </div>
-
-  <div class="types_box">
-    {#each Object.keys(typeIcons) as key}
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
-      <span
-        on:click|stopPropagation={() => clickType(key)}
-        class={selectedTypes.includes(key)
-          ? "type_chip type_chip_selected"
-          : "type_chip"}
-      >
-        {#if selectedTypes.includes(key)}
-          <span class="types_chip_icon" style="position: relative; left: 2px;">✓</span>
-        {:else}
-          <span class="types_chip_icon">{typeIcons[key].char}</span>
-        {/if}
-        <span style="float: right; margin-top: 2px;">{typeIcons[key].name}</span>
-      </span>
-    {/each}
-  </div>
+  {/if}
 
   {#if sheetConfig && rowData.rows.length > 0}
-    <div
-      style="max-width: 1000px; margin-left: auto; margin-right: auto; padding-left: 76px; margin-top: 28px; color: #3367d6;"
-    >
-      <span style="font-size: 24px;"
-        >🖃 <span style="color: black">Latest</span></span
-      >
+    <div style="max-width: 1000px; margin-left: auto; margin-right: auto; padding-left: 76px; margin-top: 28px; color: #3367d6;">
+      <a href={"/" + sheetConfig.name + "/explore?sort=Last+updated+descending"}>
+        <span style="font-size: 24px;">🖃 <span style="color: black">Latest</span><span style="margin-left: 6px; font-size: 24px; position: relative; top: -3px;">↗</span></span>
+      </a>
     </div>
 
     <div class="assets_box">
@@ -438,9 +439,11 @@
     <div
       style="max-width: 1000px; margin-left: auto; margin-right: auto; padding-left: 76px; margin-top: 28px; color: #3367d6;"
     >
-      <span style="font-size: 24px;"
-        >🖒 <span style="color: black">Highest rated</span></span
-      >
+      <a href={"/" + sheetConfig.name + "/explore?sort=Likes+descending"}>
+        <span style="font-size: 24px;"
+          >🖒 <span style="color: black">Highest rated</span><span style="margin-left: 6px; font-size: 24px; position: relative; top: -3px;">↗</span></span
+        >
+      </a>
     </div>
 
     <div class="assets_box">
@@ -467,7 +470,7 @@
   {:else}
     <div
       class="ring_lower lds-ring"
-      style="margin: auto; position: relative; top: -144px;"
+      style="margin: auto; position: relative; top: -2px;"
     >
       <div></div>
       <div></div>
@@ -494,12 +497,19 @@
     font-size: 44px;
   }
 
-  .banner_search {
+  .banner_categories {
+    margin-top: 38px;
+  }
+
+  .banner_search_box {
+    position: sticky;
+    top: 4px;
     width: 90%;
     margin: auto;
     max-width: 800px;
+    margin-bottom: 4px;
+    z-index: 2;
     height: 44px;
-    margin-top: 38px;
     border-radius: 5px;
     background-color: #fafafa;
   }
@@ -563,7 +573,7 @@
   }
 
   .types_box {
-    margin-top: 192px;
+    margin-top: 106px;
     /* margin-left: 58px; */
     max-width: 1000px;
     margin-left: auto;

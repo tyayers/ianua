@@ -12,7 +12,6 @@ export class AppService {
   currentUserLoaded: boolean = false;
   reloadFlag: boolean = false;
   data: {[key: string]: {headers: string[], rows: string[][]}} = {};
-  testMode: boolean = true;
   
   setHeaderAction: (buttonText: string) => void = (fds: string) => {
     console.log(fds);

@@ -18,9 +18,9 @@
     if (sort && selectedSort) sort(selectedSort);
   }
 
-  function onCategoryChange(e: any) {
+  function onCheckChange(collection: string[], e: any) {
     let name: string = e.target.attributes[1]["nodeValue"];
-    let tempChecked = selectedCategories;
+    let tempChecked = collection;
 
     if (e.target.checked) {
       if (!tempChecked.includes(name)){
@@ -29,59 +29,25 @@
     }
     else {
       if (tempChecked.includes(name)) {
-        let index = selectedCategories.indexOf(name);
+        let index = collection.indexOf(name);
         tempChecked.splice(index, 1);
       }
     }
 
-    selectedCategories = tempChecked;
+    collection = tempChecked;
     if (refresh) refresh();
   }
 
-  function onTopicChange(e: any) {
-    let name: string = e.target.attributes[1]["nodeValue"];
-    let tempChecked = selectedTopics;
-
-    if (e.target.checked) {
-      if (!tempChecked.includes(name)){
-        tempChecked.push(name);
-      }
-    }
-    else {
-      if (tempChecked.includes(name)) {
-        let index = selectedCategories.indexOf(name);
-        tempChecked.splice(index, 1);
-      }
-    }
-
-    selectedTopics = tempChecked;
-    if (refresh) refresh();
-  }
-
-  function onTypeChange(e: any) {
-    let name: string = e.target.attributes[1]["nodeValue"];
-    let tempChecked = selectedTypes;
-
-    if (e.target.checked) {
-      if (!tempChecked.includes(name)){
-        tempChecked.push(name);
-      }
-    }
-    else {
-      if (tempChecked.includes(name)) {
-        let index = selectedCategories.indexOf(name);
-        tempChecked.splice(index, 1);
-      }
-    }
-
-    selectedTypes = tempChecked;
-    if (refresh) refresh();
+  function checkChecked(collection: string[], value: string) {
+    let result: boolean = false;
+    if (collection.includes(value)) result = true;
+    return result;
   }
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class="filter_panel" on:click|stopPropagation={() => {}}>
+<div on:click|stopPropagation={() => {}}>
   {#if categories.length > 0}
     <h4>Sort</h4>
     <div class="form_list">
@@ -93,21 +59,21 @@
     <h4>Categories</h4>
     {#each categories as category}
       <div class="product_filter_checkbox">
-        <input type="checkbox" id={category} name={category} on:change={onCategoryChange} /><label for={category}>{category}</label>
+        <input type="checkbox" id={category} name={category} on:change={(e) => onCheckChange(selectedCategories, e)} checked={checkChecked(selectedCategories, category)} /><label for={category}>{category}</label>
       </div>
     {/each}
 
     <h4>Topics</h4>
     {#each topics as topic}
       <div class="product_filter_checkbox">
-        <input type="checkbox" id={topic} name={topic} on:change={onTopicChange} /><label for={topic}>{topic}</label>
+        <input type="checkbox" id={topic} name={topic} on:change={(e) => onCheckChange(selectedTopics, e)} checked={checkChecked(selectedTopics, topic)} /><label for={topic}>{topic}</label>
       </div>
     {/each}
 
     <h4>Types</h4>
     {#each types as type}
       <div class="product_filter_checkbox">
-        <input type="checkbox" id={type} name={type} on:change={onTypeChange} /><label for={type}>{type}</label>
+        <input type="checkbox" id={type} name={type} on:change={(e) => onCheckChange(selectedTypes, e)} checked={checkChecked(selectedTypes, type)} /><label for={type}>{type}</label>
       </div>
     {/each}
   {/if}

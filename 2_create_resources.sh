@@ -48,6 +48,5 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 echo "Setting web app variables..."
 touch .env
 echo $"PUBLIC_SITE_NAME=$SITE_NAME" >> .env
-echo $"PUBLIC_SHEET_ID=$SHEET_ID" >> .env
 echo $"PUBLIC_TEST_MODE=false" >> .env
 echo $"PUBLIC_TEST_EMAIL=" >> .env

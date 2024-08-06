@@ -3,7 +3,6 @@ import { GoogleAuth } from "google-auth-library";
 import { google } from "googleapis";
 import { DataConfig } from "$lib/interfaces";
 import { utils } from "$lib/utilities";
-import crypto from "crypto";
 
 const auth = new GoogleAuth({
 	scopes: ["https://www.googleapis.com/auth/spreadsheets",
