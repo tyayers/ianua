@@ -325,6 +325,12 @@
   </div>
 
   {#if sheetConfig && sheetConfig.categoryOrder}
+
+    <div class="explore_button">
+      <a href={"/" + sheetConfig.name + "/explore"} class="explore_button rounded_button_outlined">Explore</a>
+      <span class="new_badge">NEW</span>
+    </div>
+
     <div class="banner_search_box">
       <svg
         class="banner_search_icon"
@@ -483,6 +489,29 @@
 <div style="height: 44px"></div>
 
 <style>
+
+  .explore_button {
+    position: fixed;
+    top: 8px;
+    left: 12px;
+    z-index: 2;
+  }
+
+  .new_badge {
+    position: relative;
+    z-index: 3;
+    left: 72px;
+    background: #EA4335;
+    border-radius: 24px;
+    padding: 4px;
+    font-size: 12px;
+    color: white;
+    min-width: 13px;
+    text-align: center;
+    font-weight: bold;
+  }
+
+
   .home_box {
     width: 100%;
     min-height: 100vh;
@@ -515,6 +544,10 @@
   }
 
   @media (max-width: 1280px) {
+    .explore_button {
+      display: none;
+    }
+
     .banner_search_box {
       width: 240px;
       position: absolute;
