@@ -328,7 +328,6 @@
 
     <div class="explore_button">
       <a href={"/" + sheetConfig.name + "/explore"} class="explore_button rounded_button_outlined">Explore</a>
-      <span class="new_badge">NEW</span>
     </div>
 
     <div class="banner_search_box">
@@ -461,9 +460,11 @@
     <div
       style="max-width: 1000px; margin-left: auto; margin-right: auto; padding-left: 76px; margin-top: 28px; color: #3367d6;"
     >
-      <span style="font-size: 24px;"
-        >🗁 <span style="color: black">All</span></span
-      >
+      <a href={"/" + sheetConfig.name + "/explore"}>
+        <span style="font-size: 24px;"
+          >🗁 <span style="color: black">All</span><span style="margin-left: 6px; font-size: 24px; position: relative; top: -3px;">↗</span></span
+        >
+      </a>
     </div>
 
     <div class="assets_box">

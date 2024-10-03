@@ -19,6 +19,6 @@
 <style>
 	#layout_box {
 		height: 100vh;
-		overflow-y: auto;
+		overflow-y: scroll;
 	}
 </style>

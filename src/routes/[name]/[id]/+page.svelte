@@ -3,10 +3,10 @@
   import type { PageData } from "./$types";
   import { DataConfig, RowConfig, UsageData } from "$lib/interfaces";
   import { appService } from "$lib/app-service";
-  import Header from '$lib/components.header.svelte';
-  import EditRow from '$lib/components.row.edit.svelte';
-	import { PUBLIC_TEST_MODE } from '$env/static/public';
-    import { goto } from "$app/navigation";
+  import Header from "$lib/components.header.svelte";
+  import EditRow from "$lib/components.row.edit.svelte";
+  import { PUBLIC_TEST_MODE } from "$env/static/public";
+  import { goto } from "$app/navigation";
 
   export let data: PageData;
   let sheetConfig: DataConfig | undefined = undefined;
@@ -14,7 +14,7 @@
   let headers: string[] = [];
   let rowConfig: RowConfig | undefined = undefined;
 
-  let links: {name: string, link: string, icon?: string}[] = [];
+  let links: { name: string; link: string; icon?: string }[] = [];
   let previewEmbedLink: string = "";
   // let likes: string[] = [];
   // let types: string[] = [];
@@ -22,7 +22,17 @@
   // let levels: string[] = [];
   let rowDate: Date;
   let idIndex: number = -1;
-  let relatedData: {[key: string]: {prompt: string, sheetConfig: DataConfig, headers: string[], relatedKey: string, addOpen: boolean, newRow: RowConfig, rows: RowConfig[]}} = {};
+  let relatedData: {
+    [key: string]: {
+      prompt: string;
+      sheetConfig: DataConfig;
+      headers: string[];
+      relatedKey: string;
+      addOpen: boolean;
+      newRow: RowConfig;
+      rows: RowConfig[];
+    };
+  } = {};
 
   onMount(() => {
     document.title = "Loading...";
@@ -32,14 +42,14 @@
       sheetConfig = appService.GetSheetConfig(data.dataName, headers);
       if (sheetConfig) {
         idIndex = sheetConfig?.tagIndexes["id"][0];
-        let tempRow = result.rows.find(item => item[idIndex] === data.rowId);
+        let tempRow = result.rows.find((item) => item[idIndex] === data.rowId);
         if (tempRow) {
           row = tempRow;
           rowConfig = appService.GetRowConfig(sheetConfig, result.headers, row);
         }
-        
+
         if (rowConfig && rowConfig.links) {
-          for(let i=0; i<rowConfig.links.length; i++) {
+          for (let i = 0; i < rowConfig.links.length; i++) {
             let tempLink = rowConfig.links[i];
             let tempName = rowConfig.links[i];
             let tempIcon = "/slides.svg";
@@ -48,30 +58,30 @@
 
             if (tempLink.startsWith("go/")) {
               tempLink = "http://" + tempLink;
-            }
-            else if (tempLink.startsWith("https://github.com")) {
+            } else if (tempLink.startsWith("https://github.com")) {
               tempIcon = "/github.png";
-              tempName = "Source code assets"
-            }
-            else if (tempLink.startsWith("https://youtu.be")) {
+              tempName = "Source code assets";
+            } else if (tempLink.startsWith("https://youtu.be")) {
               tempIcon = "/youtube.webp";
-              tempName = "YouTube recording"
+              tempName = "YouTube recording";
               let pieces = tempLink.split("/");
-              previewEmbedLink = "https://www.youtube.com/embed/" + pieces[pieces.length - 1];
-            }
-            else if (tempLink.startsWith("https://www.googlecloudcommunity.com")) {
+              previewEmbedLink =
+                "https://www.youtube.com/embed/" + pieces[pieces.length - 1];
+            } else if (
+              tempLink.startsWith("https://www.googlecloudcommunity.com")
+            ) {
               tempIcon = "/gcloud.png";
-              tempName = "Google Cloud Community post"
-            }
-            else if (tempLink.includes("/presentation/")) {
+              tempName = "Google Cloud Community post";
+            } else if (tempLink.includes("/presentation/")) {
               if (tempLink.includes("/edit"))
                 previewEmbedLink = tempLink.replace("/edit", "/embed");
-              else
-                previewEmbedLink = tempLink + "/embed";
+              else previewEmbedLink = tempLink + "/embed";
 
               tempName += " Doc";
-            }
-            else if (tempLink.includes("nip.io") || tempLink.includes("run.app")) {
+            } else if (
+              tempLink.includes("nip.io") ||
+              tempLink.includes("run.app")
+            ) {
               tempName += " Client App";
               tempIcon = "/app.webp";
             }
@@ -79,15 +89,15 @@
             links.push({
               name: tempName,
               link: tempLink,
-              icon: tempIcon
-            })
+              icon: tempIcon,
+            });
           }
         }
 
         if (sheetConfig?.tagIndexes["date"])
           rowDate = new Date(row[sheetConfig.tagIndexes["date"][0]]);
-        
-        if (sheetConfig?.tagIndexes["name"])  
+
+        if (sheetConfig?.tagIndexes["name"])
           document.title = row[sheetConfig.tagIndexes["name"][0]];
 
         // go through any related data fields
@@ -97,23 +107,38 @@
             let relatedTable = relatedInfo[0];
             let relatedKey = relatedInfo[1];
             appService.LoadData(relatedTable).then((relatedRows) => {
-              let relatedSheetConfig = appService.GetSheetConfig(relatedTable, relatedRows.headers);
+              let relatedSheetConfig = appService.GetSheetConfig(
+                relatedTable,
+                relatedRows.headers,
+              );
               if (relatedSheetConfig) {
                 relatedData[relatedTable] = {
                   prompt: relatedSheetConfig.prompt,
                   sheetConfig: relatedSheetConfig,
                   headers: relatedRows.headers,
                   relatedKey: relatedKey,
-                  newRow: appService.GetRowConfig(relatedSheetConfig, relatedRows.headers),
+                  newRow: appService.GetRowConfig(
+                    relatedSheetConfig,
+                    relatedRows.headers,
+                  ),
                   addOpen: false,
-                  rows: []
+                  rows: [],
                 };
                 let relatedIdIndex = relatedRows.headers.indexOf(relatedKey);
                 relatedRows.rows.forEach((relatedRow) => {
                   if (relatedRow[relatedIdIndex] === rowConfig?.id) {
                     // we have a related record
-                    if (relatedSheetConfig?.tagIndexes["date"] && relatedSheetConfig?.tagIndexes["description"]) {
-                      relatedData[relatedTable].rows.unshift(appService.GetRowConfig(relatedSheetConfig, relatedRows.headers, relatedRow));
+                    if (
+                      relatedSheetConfig?.tagIndexes["date"] &&
+                      relatedSheetConfig?.tagIndexes["description"]
+                    ) {
+                      relatedData[relatedTable].rows.unshift(
+                        appService.GetRowConfig(
+                          relatedSheetConfig,
+                          relatedRows.headers,
+                          relatedRow,
+                        ),
+                      );
                     }
                   }
                 });
@@ -127,12 +152,22 @@
         fetch("/api/data/" + data.dataName + "/usage", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(new UsageData(row[sheetConfig.tagIndexes["id"][0]], row[sheetConfig.tagIndexes["name"][0]], "VISIT", (new Date()).toString(), ""))
+          body: JSON.stringify(
+            new UsageData(
+              row[sheetConfig.tagIndexes["id"][0]],
+              row[sheetConfig.tagIndexes["name"][0]],
+              "VISIT",
+              new Date().toString(),
+              "",
+            ),
+          ),
         }).then((response) => {
           if (response.status != 200) {
-            console.error("Could not update usage data - " + response.statusText);
+            console.error(
+              "Could not update usage data - " + response.statusText,
+            );
           }
         });
       }
@@ -141,25 +176,29 @@
 
   function likeClick() {
     let method: string = "PATCH";
-    if (appService.currentUser && rowConfig && rowConfig.likes.includes(appService.currentUser.email)) {
+    if (
+      appService.currentUser &&
+      rowConfig &&
+      rowConfig.likes.includes(appService.currentUser.email)
+    ) {
       method = "DELETE";
       let index = rowConfig.likes.indexOf(appService.currentUser.email);
       if (index >= 0) rowConfig.likes.splice(index, 1);
       rowConfig.likes = rowConfig.likes;
-    }
-    else if (rowConfig) {
+    } else if (rowConfig) {
       if (appService.currentUser)
         rowConfig.likes.push(appService.currentUser?.email);
       rowConfig.likes = rowConfig.likes;
     }
 
     if (rowConfig && sheetConfig?.tagIndexes["likes"])
-      rowConfig.row[sheetConfig?.tagIndexes["likes"][0]] = rowConfig.likes.join(",");
+      rowConfig.row[sheetConfig?.tagIndexes["likes"][0]] =
+        rowConfig.likes.join(",");
 
     if (PUBLIC_TEST_MODE !== "true" && sheetConfig) {
       let url = `/api/data/${sheetConfig.name}/${row[sheetConfig?.tagIndexes["id"][0]]}/likes?email=${appService.currentUser?.email}&row=${row[row.length - 1]}&column=${sheetConfig.tagIndexes["likes"]}`;
       fetch(url, {
-        method: method
+        method: method,
       });
     }
   }
@@ -168,7 +207,8 @@
     let result = "likes_number";
 
     if (likes.length > 0) result += " likes_active";
-    if (appService.currentUser && likes.includes(appService.currentUser.email)) result += " likes_user";
+    if (appService.currentUser && likes.includes(appService.currentUser.email))
+      result += " likes_user";
 
     return result;
   }
@@ -177,7 +217,8 @@
     let result = "likes_icon";
 
     if (likes.length > 0) result += " likes_active";
-    if (appService.currentUser && likes.includes(appService.currentUser.email)) result += " likes_user";
+    if (appService.currentUser && likes.includes(appService.currentUser.email))
+      result += " likes_user";
 
     return result;
   }
@@ -200,9 +241,17 @@
       fetch("/api/data/" + data.dataName + "/usage", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(new UsageData(row[sheetConfig.tagIndexes["id"][0]], row[sheetConfig.tagIndexes["name"][0]], "OPEN", nowDate.toString(), link))
+        body: JSON.stringify(
+          new UsageData(
+            row[sheetConfig.tagIndexes["id"][0]],
+            row[sheetConfig.tagIndexes["name"][0]],
+            "OPEN",
+            nowDate.toString(),
+            link,
+          ),
+        ),
       }).then((response) => {
         if (response.status != 200) {
           console.error("Could not update usage data - " + response.statusText);
@@ -213,18 +262,31 @@
 
   function openAddRelated(relatedName: string) {
     if (relatedData[relatedName]) {
-      relatedData[relatedName].newRow = appService.GetRowConfig(relatedData[relatedName].sheetConfig, relatedData[relatedName].headers);
+      relatedData[relatedName].newRow = appService.GetRowConfig(
+        relatedData[relatedName].sheetConfig,
+        relatedData[relatedName].headers,
+      );
       relatedData[relatedName].addOpen = true;
     }
   }
 
   function submitAddRelated(relatedName: string) {
     if (relatedData[relatedName]) {
-
-      let relatedKeyIndex = relatedData[relatedName].headers.indexOf(relatedData[relatedName].relatedKey);
+      let relatedKeyIndex = relatedData[relatedName].headers.indexOf(
+        relatedData[relatedName].relatedKey,
+      );
       relatedData[relatedName].newRow.row[relatedKeyIndex] = data.rowId;
-      relatedData[relatedName].rows.unshift(appService.GetRowConfig(relatedData[relatedName].sheetConfig, relatedData[relatedName].headers, relatedData[relatedName].newRow.row));
-      relatedData[relatedName].newRow = appService.GetRowConfig(relatedData[relatedName].sheetConfig, relatedData[relatedName].headers);
+      relatedData[relatedName].rows.unshift(
+        appService.GetRowConfig(
+          relatedData[relatedName].sheetConfig,
+          relatedData[relatedName].headers,
+          relatedData[relatedName].newRow.row,
+        ),
+      );
+      relatedData[relatedName].newRow = appService.GetRowConfig(
+        relatedData[relatedName].sheetConfig,
+        relatedData[relatedName].headers,
+      );
 
       relatedData[relatedName].addOpen = false;
 
@@ -232,22 +294,22 @@
       fetch("/api/data/" + relatedName, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(relatedData[relatedName].rows[0].row)
+        body: JSON.stringify(relatedData[relatedName].rows[0].row),
       }).then((response) => {
         // console.log(`Response ${response.status} - ${response.statusText} from asset post.`);
         if (response.status !== 200)
-          console.error(`Error creating ${relatedName} row: ${response.status} - ${response.statusText}.`);
+          console.error(
+            `Error creating ${relatedName} row: ${response.status} - ${response.statusText}.`,
+          );
       });
     }
   }
 
   function goBack() {
-    if (history.length > 1)
-      history.back();
-    else
-      goto("/");
+    if (history.length > 1) history.back();
+    else goto("/");
   }
 </script>
 
@@ -256,15 +318,39 @@
 <div class="page">
   {#if sheetConfig && rowConfig && rowConfig.row.length > 0}
     <div class="back_box">
-      <button style="float: left;" class="back_button" on:click={goBack}><svg data-icon-name="arrowBackIcon" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill-rule="evenodd" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"></path></svg></button>
-      <a style="float: right; position: relative; top: 22px; left: -18px; color: #4285f4;" href={"/" + data.dataName + "/" + row[sheetConfig.tagIndexes["id"][0]] + "/edit"}>Edit</a>
+      <button style="float: left;" class="back_button" on:click={goBack}
+        ><svg
+          data-icon-name="arrowBackIcon"
+          viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          aria-hidden="true"
+          ><path
+            fill-rule="evenodd"
+            d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"
+          ></path></svg
+        ></button
+      >
+      <a
+        class="back_edit_button"
+        href={"/" +
+          data.dataName +
+          "/" +
+          row[sheetConfig.tagIndexes["id"][0]] +
+          "/edit"}>Edit</a
+      >
     </div>
 
     <div class="title" style="">{rowConfig.name}</div>
 
     {#if previewEmbedLink}
       <div style="margin-bottom: 24px;">
-        <iframe width="100%" height="374" src={previewEmbedLink} title="Embedded content preview"></iframe>
+        <iframe
+          width="100%"
+          height="374"
+          src={previewEmbedLink}
+          title="Embedded content preview"
+        ></iframe>
       </div>
     {/if}
 
@@ -273,14 +359,16 @@
     </div>
 
     <div style="display: flex; width: 100%; margin-top: 22px;">
-
       {#if sheetConfig.tagIndexes["status"] || sheetConfig.tagIndexes["audience"]}
-        <div class="block" style="font-weight: bold; margin-top: 4px; width: 100%;">
+        <div
+          class="block"
+          style="font-weight: bold; margin-top: 4px; width: 100%;"
+        >
           {#if sheetConfig.tagIndexes["status"]}
             {row[sheetConfig.tagIndexes["status"][0]]}
           {/if}
-          - 
-          {#if sheetConfig.tagIndexes["audience"]} 
+          -
+          {#if sheetConfig.tagIndexes["audience"]}
             {row[sheetConfig.tagIndexes["audience"][0]]}
           {/if}
         </div>
@@ -313,7 +401,13 @@
 
     {#if sheetConfig.tagIndexes["user"]}
       <div class="block">
-        By <a href={"https://moma.corp.google.com/search?q=" + row[sheetConfig.tagIndexes["user"][0]]} target="_blank" style="font-weight: bold; color: #3367d6;">{row[sheetConfig.tagIndexes["user"][0]]}</a>
+        By <a
+          href={"https://moma.corp.google.com/search?q=" +
+            row[sheetConfig.tagIndexes["user"][0]]}
+          target="_blank"
+          style="font-weight: bold; color: #3367d6;"
+          >{row[sheetConfig.tagIndexes["user"][0]]}</a
+        >
       </div>
     {/if}
 
@@ -335,16 +429,29 @@
       <div class="asset_detail">
         {#each links as link}
           <div>
-            <img src={link.icon} width="18px" alt="Link" style="position: relative; top: 2px;" />
-            <a href={link.link} style="color: #3367d6;" target="_blank" on:mousedown={() => openButton(link.link)}>{link.name} <svg
-              class="right_content_tip_learnmore"
-              width="24px" height="24px"
-              aria-hidden="true"
-              ><path
-                fill-rule="evenodd"
-                d="M13.85 5H14V4h-4v1h2.15l-5.36 5.364.848.848L13 5.85V8h1V4h-1v.15l.15-.15.85.85-.15.15zM8 4H4.995A1 1 0 004 4.995v8.01a1 1 0 00.995.995h8.01a1 1 0 00.995-.995V10h-1v3H5V5h3V4z"
-              ></path></svg
-            ></a>
+            <img
+              src={link.icon}
+              width="18px"
+              alt="Link"
+              style="position: relative; top: 2px;"
+            />
+            <a
+              href={link.link}
+              style="color: #3367d6;"
+              target="_blank"
+              on:mousedown={() => openButton(link.link)}
+              >{link.name}
+              <svg
+                class="right_content_tip_learnmore"
+                width="24px"
+                height="24px"
+                aria-hidden="true"
+                ><path
+                  fill-rule="evenodd"
+                  d="M13.85 5H14V4h-4v1h2.15l-5.36 5.364.848.848L13 5.85V8h1V4h-1v.15l.15-.15.85.85-.15.15zM8 4H4.995A1 1 0 004 4.995v8.01a1 1 0 00.995.995h8.01a1 1 0 00.995-.995V10h-1v3H5V5h3V4z"
+                ></path></svg
+              ></a
+            >
           </div>
         {/each}
       </div>
@@ -371,26 +478,47 @@
     {#if sheetConfig.relatedFields.length > 0}
       {#each Object.keys(relatedData) as related}
         <div style="margin-bottom: 64px;">
-          <h3 style="margin-top: 24px; margin-bottom: 2px;">{related.charAt(0).toUpperCase() + related.slice(1)}</h3>
+          <h3 style="margin-top: 24px; margin-bottom: 2px;">
+            {related.charAt(0).toUpperCase() + related.slice(1)}
+          </h3>
           {#if relatedData[related]}
             <div style="font-size: 14px; margin-top: 8px;">
               {relatedData[related].prompt}
             </div>
 
             {#if !relatedData[related].addOpen}
-              <button on:click={() => openAddRelated(related)} style="font-size: 14px; color: rgb(66, 133, 244); margin-top: 8px; font-weight: bold;">+ Add</button>
+              <button
+                on:click={() => openAddRelated(related)}
+                style="font-size: 14px; color: rgb(66, 133, 244); margin-top: 8px; font-weight: bold;"
+                >+ Add</button
+              >
             {:else}
-              <div style="position: relative; top: -8px; padding-left: 14px; width: 70%; margin-bottom: 18px;">
-                <EditRow sheetConfig={relatedData[related].sheetConfig} rowConfig={relatedData[related].newRow} />
+              <div
+                style="position: relative; top: -8px; padding-left: 14px; width: 70%; margin-bottom: 18px;"
+              >
+                <EditRow
+                  sheetConfig={relatedData[related].sheetConfig}
+                  rowConfig={relatedData[related].newRow}
+                />
                 <div>
-                  <button class="rounded_button_outlined" on:click={() => relatedData[related].addOpen = !relatedData[related].addOpen}>Cancel</button>
-                  <button on:click={() => submitAddRelated(related)} class="rounded_button_filled">Submit</button>
+                  <button
+                    class="rounded_button_outlined"
+                    on:click={() =>
+                      (relatedData[related].addOpen =
+                        !relatedData[related].addOpen)}>Cancel</button
+                  >
+                  <button
+                    on:click={() => submitAddRelated(related)}
+                    class="rounded_button_filled">Submit</button
+                  >
                 </div>
               </div>
             {/if}
 
             {#each relatedData[related].rows as relatedRow}
-              <div style="margin-top: 16px; font-style: italic; color: rgb(95, 99, 104);">
+              <div
+                style="margin-top: 16px; font-style: italic; color: rgb(95, 99, 104);"
+              >
                 {relatedRow.date} - {relatedRow.description}
               </div>
             {/each}
@@ -398,7 +526,6 @@
         </div>
       {/each}
     {/if}
-
   {:else}
     <div
       class="ring_lower lds-ring"
@@ -408,8 +535,7 @@
       <div></div>
       <div></div>
       <div></div>
-    </div>  
-
+    </div>
   {/if}
 </div>
 
@@ -423,16 +549,26 @@
   }
 
   .back_box {
-    position: absolute;
+    position: sticky;
+    height: 50px;
+    top: 2px;
     max-width: 600px;
-    top: 50px;
     width: 100%;
+    z-index: 5;
     /* display: flex; */
   }
 
   .back_button {
     position: relative;
     left: -10px;
+  }
+
+  .back_edit_button {
+    float: right;
+    position: relative;
+    top: 16px;
+    left: -18px;
+    color: #4285f4;
   }
 
   .title {
@@ -445,7 +581,7 @@
     margin-bottom: 30px;
     margin-top: 30px;
     word-break: break-word;
-    width: 100%; 
+    width: 100%;
     text-align: left;
   }
 
@@ -464,8 +600,8 @@
     margin-top: 24px;
     font-family: Roboto, Arial, sans-serif;
     line-height: 1.25rem;
-    font-size: .875rem;
-    letter-spacing: .0178571429em;
+    font-size: 0.875rem;
+    letter-spacing: 0.0178571429em;
     font-weight: 500;
     color: rgb(60, 64, 67);
     font-weight: 400;
