@@ -3,6 +3,7 @@ import { GoogleAuth } from "google-auth-library";
 import { google } from "googleapis";
 import { DataConfig } from "$lib/interfaces";
 import { utils } from "$lib/utilities";
+import * as crypto from "node:crypto";
 
 const auth = new GoogleAuth({
 	scopes: ["https://www.googleapis.com/auth/spreadsheets",
@@ -60,11 +61,11 @@ export const GET: RequestHandler = async ( {params, fetch} ) => {
         rows.forEach((row, i) => {
           let id: string = row[idIndex].toString();
           if (!id || id.length < 2) {
-            //id = crypto.randomBytes(10).toString("hex");
+            id = crypto.randomBytes(10).toString("hex");
             if (sheetConfig) {
-              id = row[sheetConfig.tagIndexes["name"][0]].toLowerCase().replaceAll(" ", "_");
-              if (id.length > 30) id = id.substring(0, 29);
-              id += (new Date()).getDay();
+              // id = row[sheetConfig.tagIndexes["name"][0]].toLowerCase().replaceAll(" ", "_");
+              // if (id.length > 30) id = id.substring(0, 29);
+              // id += (new Date()).getDay();
 
               row[idIndex] = id;
               updateRow(row, i, sheetConfig.rangeStart, sheetConfig.rangeEnd, sheetConfig.rowStart, sheetConfig.sheetId);
@@ -100,9 +101,10 @@ export const POST: RequestHandler = async ({ request, params }) => {
   
   const newRow: string[] = await request.json();
   if (sheetConfig) {
-    let id = newRow[sheetConfig.tagIndexes["name"][0]].toLowerCase().replaceAll(" ", "_");
-    if (id.length > 30) id = id.substring(0, 29);
-    id += (new Date()).getDay();
+    const id = crypto.randomBytes(10).toString("hex");
+    // let id = newRow[sheetConfig.tagIndexes["name"][0]].toLowerCase().replaceAll(" ", "_");
+    // if (id.length > 30) id = id.substring(0, 29);
+    // id += (new Date()).getDay();
 
     newRow[0] = id;
 

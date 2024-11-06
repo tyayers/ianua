@@ -299,10 +299,29 @@
         body: JSON.stringify(relatedData[relatedName].rows[0].row),
       }).then((response) => {
         // console.log(`Response ${response.status} - ${response.statusText} from asset post.`);
-        if (response.status !== 200)
+        if (response.status !== 200) {
           console.error(
             `Error creating ${relatedName} row: ${response.status} - ${response.statusText}.`,
           );
+        }
+        else {
+          // Trigger email workflow
+          if (sheetConfig) {
+            let name;
+            if (sheetConfig?.tagIndexes["name"])
+              name = row[sheetConfig.tagIndexes["name"][0]];
+            else
+              name = row[sheetConfig.tagIndexes["id"][0]];
+            let id = row[sheetConfig.tagIndexes["id"][0]];
+            let message = "<div style='width: 600px;'><img src='https://storage.googleapis.com/apigee-assets-public-4k32/assets-banner.png' alt='Apigee assets logo' /><h1>Feedback received for: " + name + "</h1><p style='font-size: 14px;'>" + relatedData[relatedName].rows[0].row.join("<br />") + "</p><br><p><a href='go/apigee-assets/" + id + "' target='__blank'>go/apigee-assets/" + id + "</a></p></div>"
+            
+            document.title = row[sheetConfig.tagIndexes["name"][0]];
+
+            fetch("/api/email?email=" + row[sheetConfig.tagIndexes["user"][0]] + "&message=" + escape(message), {
+              method: "POST"
+            });
+          }
+        }
       });
     }
   }

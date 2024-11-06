@@ -45,6 +45,10 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member="serviceAccount:asset-service@$PROJECT_ID.iam.gserviceaccount.com" \
     --role="roles/run.invoker"
 
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:asset-service@$PROJECT_ID.iam.gserviceaccount.com" \
+    --role="roles/integrations.integrationInvoker"
+
 echo "Setting web app variables..."
 touch .env
 echo $"PUBLIC_SITE_NAME=$SITE_NAME" >> .env

@@ -489,6 +489,11 @@
 
 <div style="height: 44px"></div>
 
+<div style="position: fixed; bottom: 40px; left: 20px;">
+  <a href={"https://apigee-test74-apigeeassets.apigee.io/"} target="__blank" class="rounded_button_outlined"> 
+    Dev Portal ↗</a>
+</div>
+
 <style>
 
   .explore_button {

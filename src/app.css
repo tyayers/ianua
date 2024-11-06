@@ -74,7 +74,7 @@ button {
   font-size: 14px;
   /* color: #6750a4; */
   color: var(--primary-color);
-  background-color: transparent;
+  background-color: white;
   cursor: pointer;
   text-decoration: none;
   margin-right: 6px;
